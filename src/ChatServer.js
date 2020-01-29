@@ -9,11 +9,9 @@ const log4js = require('log4js');
 const logger = log4js.getLogger('chat');
 logger.level = 'debug';
 
-//import webpages
-const index = require('./web/index');
-
-//import socket server
+//import server modules
 const socketServer = require('./socket/SocketServer');
+const webServer = require('./web/WebServer')
 
 class ChatServer {
     //TODO: Load from ENV variables
@@ -31,6 +29,7 @@ class ChatServer {
     io = null;
 
     socketServer = null;
+    webServer = null;
 
     constructor() {
         this.httpServerStarted = this.httpServerStarted.bind(this);
@@ -52,23 +51,17 @@ class ChatServer {
         logger.info("Connecting to database...")
         mongoose.connect(this.mongoURL, this.mongooseOptions).then(() => {
             logger.info("Connected to database");
-            this.setupWebServer();
-            this.setupSocketServer();
+            this.webServer = new webServer(this.app);
+            this.webServer.setupWebServer();
+            this.socketServer = new socketServer(this.io);
+            this.socketServer.setupSocketServer();
 
             this.http.listen(this.port, this.httpServerStarted);
-        }).catch(() => {
+        }).catch((e) => {
             logger.fatal("Connecting to database failed, exiting...");
+            logger.debug(e)
             process.exit();
         })
-    }
-
-    setupWebServer() {
-        this.app.get('/', index);
-    }
-
-    setupSocketServer() {
-        this.socketServer = new socketServer(this.io);
-        this.socketServer.setupSocketServer();
     }
 
     httpServerStarted() {

@@ -1,9 +1,4 @@
-const passport = require('passport');
-const LocalStrategy = require('passport-local').Strategy;
-
-const Account = require('./models/accounts');
-
-const routes = require('./routes')
+const Users = require('./models/Users');
 
 //setup logging
 const log4js = require('log4js');
@@ -16,10 +11,8 @@ class LoginSystem {
   }
 
   setupLogin() {
-    passport.use(new LocalStrategy(Account.authenticate()));
-    passport.serializeUser(Account.serializeUser());
-    passport.deserializeUser(Account.deserializeUser());
-
+    //don't import until needed to prevent errors
+    const routes = require('./routes')
     this.app.use('/auth', routes);
 
     logger.info("Started login system")

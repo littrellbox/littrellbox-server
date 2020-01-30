@@ -2,14 +2,14 @@ const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const loginSystem = require('./login/LoginSystem');
 
+var cors = require('cors');
+
 //setup logging
 const log4js = require('log4js');
 const logger = log4js.getLogger('web');
 logger.level = 'debug';
 
 class WebServer {
-  secret = "dev secret"; //TODO: env variables
-
   loginSystem = null;
 
   constructor(app) {
@@ -17,11 +17,13 @@ class WebServer {
   }
 
   setupWebServer() {
+    this.app.use(cors())
+
     this.app.use(bodyParser.json());
     this.app.use(bodyParser.urlencoded({ extended: false }));
     this.app.use(cookieParser());
     this.app.use(require('express-session')({
-        secret: this.secret,
+        secret: process.env.SECRET,
         resave: false,
         saveUninitialized: false
     }));

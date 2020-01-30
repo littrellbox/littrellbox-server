@@ -15,10 +15,6 @@ const webServer = require('./web/WebServer')
 
 class ChatServer {
     //TODO: Load from ENV variables
-    port = 3001;
-    mongoURL = "mongodb://localhost:27017/littrellbox";
-    redisHost = null;
-    redisPort = 6379;
     mongooseOptions = {
         useUnifiedTopology: true,
         useNewUrlParser: true
@@ -41,22 +37,22 @@ class ChatServer {
         this.http = http.createServer(this.app);
         this.io = require('socket.io')(this.http);
         
-        if(this.redisHost) {
-            io.adapter(redisAdapter({ host: this.redisHost, port: this.redisPort }));
+        if(process.env.REDIS_HOST) {
+            io.adapter(redisAdapter({ host: process.env.REDIS_HOST, port: process.env.REDIS_PORT }));
         } else {
             logger.warn("Not using Redis!");
             logger.warn("This server will not sync with any other servers!")
         }
 
         logger.info("Connecting to database...")
-        mongoose.connect(this.mongoURL, this.mongooseOptions).then(() => {
+        mongoose.connect(process.env.MONGO_URL, this.mongooseOptions).then(() => {
             logger.info("Connected to database");
             this.webServer = new webServer(this.app);
             this.webServer.setupWebServer();
             this.socketServer = new socketServer(this.io);
             this.socketServer.setupSocketServer();
-
-            this.http.listen(this.port, this.httpServerStarted);
+            
+            this.http.listen(parseInt(process.env.PORT), this.httpServerStarted);
         }).catch((e) => {
             logger.fatal("Connecting to database failed, exiting...");
             logger.debug(e)
@@ -65,7 +61,7 @@ class ChatServer {
     }
 
     httpServerStarted() {
-        logger.info("Listing on port " + this.port);
+        logger.info("Listing on port " + process.env.PORT);
     }
 }
 

@@ -1,26 +1,84 @@
-var express = require('express');
-var passport = require('passport');
-var Account = require('./models/accounts');
-var router = express.Router();
+const mongoose = require('mongoose');
+const passport = require('passport');
+const router = require('express').Router();
+const auth = require('./auth');
+const Users = mongoose.model('Users');
 
-router.post('/register', function(req, res) {
-    Account.register(new Account({ username : req.body.username }), req.body.password, function(err, account) {
-        if (err) {
-            return res.render('register', { account : account });
-        }
+router.post('/login', auth.optional, (req, res, next) => {
+  const reqUser = req.body;
 
-        passport.authenticate('local')(req, res, function () {
-            res.redirect('/');
-        });
+  console.log("A")
+
+  if(!reqUser.username) {
+    console.log("B1")
+    return res.status(400).json({
+      errors: {
+        username: 'is required',
+      },
     });
+  }
+
+  if(!reqUser.password) {
+    console.log("B2")
+    return res.status(400).json({
+      errors: {
+        password: 'is required',
+      },
+    });
+  }
+
+  Users.findOne({ username: reqUser.username }).then((user) => {
+    if(!user || !user.validatePassword(reqUser.password)) {
+      return res.status(400).json({
+        errors: {
+          all: "wrong",
+        },
+      });
+    }
+
+    return res.json({user: user.toAuthJSON()});
+  }).catch((err) => {
+    return res.status(500).json({
+      errors: {
+        ISE: true
+      }
+    })
+  })
 });
 
-router.post('/login', passport.authenticate('local'), function(req, res) {
-    res.redirect('/');
-});
+router.post('/register', auth.optional, (req, res, next) => {
+  const user = req.body;
 
-router.get('/logout', function(req, res) {
-    req.logout();
+  if(!user.username) {
+    return res.status(422).json({
+      errors: {
+        username: 'is required',
+      },
+    });
+  }
+
+  if(!user.email) {
+    return res.status(422).json({
+      errors: {
+        email: 'is required',
+      },
+    });
+  }
+
+  if(!user.password) {
+    return res.status(422).json({
+      errors: {
+        password: 'is required',
+      },
+    });
+  }
+
+  const finalUser = new Users(user);
+
+  finalUser.setPassword(user.password);
+
+  return finalUser.save()
+    .then(() => res.json({ user: finalUser.toAuthJSON() }));
 });
 
 module.exports = router;

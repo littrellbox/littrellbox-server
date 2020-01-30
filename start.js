@@ -1,4 +1,5 @@
 const chatServer = require('./src/ChatServer')
+require('dotenv').config()
 
 //setup logging
 const log4js = require('log4js');

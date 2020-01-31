@@ -7,10 +7,7 @@ const Users = mongoose.model('Users');
 router.post('/login', auth.optional, (req, res, next) => {
   const reqUser = req.body;
 
-  console.log("A")
-
   if(!reqUser.username) {
-    console.log("B1")
     return res.status(400).json({
       errors: {
         username: 'is required',
@@ -19,7 +16,6 @@ router.post('/login', auth.optional, (req, res, next) => {
   }
 
   if(!reqUser.password) {
-    console.log("B2")
     return res.status(400).json({
       errors: {
         password: 'is required',
@@ -42,8 +38,8 @@ router.post('/login', auth.optional, (req, res, next) => {
       errors: {
         ISE: true
       }
-    })
-  })
+    });
+  });
 });
 
 router.post('/register', auth.optional, (req, res, next) => {
@@ -78,7 +74,11 @@ router.post('/register', auth.optional, (req, res, next) => {
   finalUser.setPassword(user.password);
 
   return finalUser.save()
-    .then(() => res.json({ user: finalUser.toAuthJSON() }));
+    .then(() => {
+      let user = finalUser.toAuthJSON();
+      res.cookie('authToken', finalUser.token, {httpOnly: true, maxAge: (new Date().getDate() + 60)});
+      res.json({ user: finalUser.toAuthJSON() });
+    });
 });
 
 module.exports = router;

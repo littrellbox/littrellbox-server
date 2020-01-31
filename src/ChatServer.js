@@ -11,7 +11,7 @@ logger.level = 'debug';
 
 //import server modules
 const socketServer = require('./socket/SocketServer');
-const webServer = require('./web/WebServer')
+const webServer = require('./web/WebServer');
 
 class ChatServer {
     //TODO: Load from ENV variables
@@ -32,7 +32,7 @@ class ChatServer {
     }
 
     startServer() {
-        logger.info("Starting chat server")
+        logger.info("Starting chat server");
         this.app = express();
         this.http = http.createServer(this.app);
         this.io = require('socket.io')(this.http);
@@ -41,10 +41,10 @@ class ChatServer {
             io.adapter(redisAdapter({ host: process.env.REDIS_HOST, port: process.env.REDIS_PORT }));
         } else {
             logger.warn("Not using Redis!");
-            logger.warn("This server will not sync with any other servers!")
+            logger.warn("This server will not sync with any other servers!");
         }
 
-        logger.info("Connecting to database...")
+        logger.info("Connecting to database...");
         mongoose.connect(process.env.MONGO_URL, this.mongooseOptions).then(() => {
             logger.info("Connected to database");
             this.webServer = new webServer(this.app);
@@ -55,9 +55,9 @@ class ChatServer {
             this.http.listen(parseInt(process.env.PORT), this.httpServerStarted);
         }).catch((e) => {
             logger.fatal("Connecting to database failed, exiting...");
-            logger.debug(e)
+            logger.debug(e);
             process.exit();
-        })
+        });
     }
 
     httpServerStarted() {

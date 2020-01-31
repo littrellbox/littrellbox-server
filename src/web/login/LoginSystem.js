@@ -12,10 +12,10 @@ class LoginSystem {
 
   setupLogin() {
     //don't import until needed to prevent errors
-    const routes = require('./routes')
+    const routes = require('./routes');
     this.app.use('/auth', routes);
 
-    logger.info("Started login system")
+    logger.info("Started login system");
   }
 }
 

@@ -1,3 +1,5 @@
+const cookies = require('cookies');
+
 //setup logging
 const log4js = require('log4js');
 const logger = log4js.getLogger('socket');
@@ -10,9 +12,10 @@ class SocketServer {
 
   setupSocketServer() {
     this.io.on('connection', function(socket){
-      logger.info('User connected');
-      
-    })
+      let cookiesUnparsed = socket.handshake.headers.cookie;
+      let cookiesParsed = cookies(cookiesUnparsed);
+      console.log(cookiesParsed);
+    });
     logger.info("Socket.IO started");
   }
 }

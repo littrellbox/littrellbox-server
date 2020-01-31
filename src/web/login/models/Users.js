@@ -32,7 +32,7 @@ UsersSchema.methods.generateJWT = function() {
     username: this.username,
     exp: parseInt(expirationDate.getTime() / 1000, 10),
   }, process.env.JWT_SECRET);
-}
+};
 
 UsersSchema.methods.toAuthJSON = function() {
   return {

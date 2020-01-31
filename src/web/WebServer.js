@@ -2,7 +2,7 @@ const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const loginSystem = require('./login/LoginSystem');
 
-var cors = require('cors');
+let cors = require('cors');
 
 //setup logging
 const log4js = require('log4js');
@@ -17,7 +17,7 @@ class WebServer {
   }
 
   setupWebServer() {
-    this.app.use(cors())
+    this.app.use(cors());
 
     this.app.use(bodyParser.json());
     this.app.use(bodyParser.urlencoded({ extended: false }));

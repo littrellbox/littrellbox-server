@@ -48,7 +48,7 @@ router.post('/register', auth.optional, (req, res, next) => {
   const user = req.body;
 
   if(!user.username) {
-    return res.status(422).json({
+    return res.status(400).json({
       errors: {
         username: 'is required',
       },
@@ -56,7 +56,7 @@ router.post('/register', auth.optional, (req, res, next) => {
   }
 
   if(!user.email) {
-    return res.status(422).json({
+    return res.status(400).json({
       errors: {
         email: 'is required',
       },
@@ -64,23 +64,33 @@ router.post('/register', auth.optional, (req, res, next) => {
   }
 
   if(!user.password) {
-    return res.status(422).json({
+    return res.status(400).json({
       errors: {
         password: 'is required',
       },
     });
   }
 
-  const finalUser = new Users(user);
+  Users.findOne({username: user.username}).then((foundUser) => {
+    if(foundUser) {
+      return res.status(400).json({
+        errors: {
+          username: 'is taken'
+        }
+      });
+    } else {
+      const finalUser = new Users(user);
 
-  finalUser.setPassword(user.password);
+      finalUser.setPassword(user.password);
 
-  return finalUser.save()
-    .then(() => {
-      let userData = finalUser.toAuthJSON();
-      res.cookie('authToken', userData.token, {httpOnly: true, maxAge: (new Date().getDate() + 60)});
-      res.json({ user: userData });
-    });
+      return finalUser.save()
+        .then(() => {
+          let userData = finalUser.toAuthJSON();
+          res.cookie('authToken', userData.token, {httpOnly: true, maxAge: (new Date().getDate() + 60)});
+          res.json({ user: userData });
+        });
+    }
+  });
 });
 
 module.exports = router;

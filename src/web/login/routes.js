@@ -32,7 +32,9 @@ router.post('/login', auth.optional, (req, res, next) => {
       });
     }
 
-    return res.json({user: user.toAuthJSON()});
+    let userData = user.toAuthJSON();
+    res.cookie('authToken', userData.token, {httpOnly: true, maxAge: (new Date().getDate() + 60)});
+    res.json({ user: userData });
   }).catch((err) => {
     return res.status(500).json({
       errors: {
@@ -75,9 +77,9 @@ router.post('/register', auth.optional, (req, res, next) => {
 
   return finalUser.save()
     .then(() => {
-      let user = finalUser.toAuthJSON();
-      res.cookie('authToken', finalUser.token, {httpOnly: true, maxAge: (new Date().getDate() + 60)});
-      res.json({ user: finalUser.toAuthJSON() });
+      let userData = finalUser.toAuthJSON();
+      res.cookie('authToken', userData.token, {httpOnly: true, maxAge: (new Date().getDate() + 60)});
+      res.json({ user: userData });
     });
 });
 

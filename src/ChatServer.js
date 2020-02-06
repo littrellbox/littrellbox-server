@@ -53,6 +53,7 @@ class ChatServer {
         }
 
         logger.info("Connecting to database...");
+        mongoose.set('useCreateIndex', true);
         mongoose.connect(process.env.MONGO_URL, this.mongooseOptions).then(() => {
             logger.info("Connected to database");
             this.webServer = new webServer(this.app);

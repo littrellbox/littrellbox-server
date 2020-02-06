@@ -18,8 +18,8 @@ class SocketServer {
 
   setupSocketServer() {
     this.io.on('connection', function(socket){
-      socket.on('authenticate', (token) => authenticateUser(token, socket));
-      socket.on('disconnect', () => disconnectUser(socket));
+      socket.on('authenticate', (token) => this.authenticateUser(token, socket));
+      socket.on('disconnect', () => this.disconnectUser(socket));
     }.bind(this));
     logger.info("Socket.IO started");
   }
@@ -32,7 +32,6 @@ class SocketServer {
       logger.debug("User connected");
       socket.emit('authentication', decode);
       this.users[socket.id] = (new User(socket, decode));
-      this.users[socket.id].setupClient();
     }.bind(this));
   }
 

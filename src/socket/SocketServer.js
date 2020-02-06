@@ -20,6 +20,7 @@ class SocketServer {
     this.io.on('connection', function(socket){
       socket.on('authenticate', (token) => this.authenticateUser(token, socket));
       socket.on('disconnect', () => this.disconnectUser(socket));
+      socket.on('logout', () => this.disconnectUser(socket));
     }.bind(this));
     logger.info("Socket.IO started");
   }

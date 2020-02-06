@@ -65,7 +65,9 @@ class PlanetHandler {
   getAllPlanets() {
     PlanetMembers.find({userId: this.user._id}, (err, documents) => {
       for(const document of documents) {
-        this.socket.emit('updateplanet', document._id, document);
+        Planets.findById(document.planetId, (err, document2) => {
+          this.socket.emit('updateplanet', document2._id, document2);
+        });
       }
     });
   }

@@ -33,7 +33,12 @@ router.post('/login', auth.optional, (req, res, next) => {
     }
 
     let userData = user.toAuthJSON();
-    res.cookie('authToken', userData.token, {httpOnly: true, maxAge: (new Date().getDate() + 60)});
+
+    const today = new Date();
+    const expirationDate = new Date(today);
+    expirationDate.setDate(today.getDate() + 60);
+
+    res.cookie('authToken', userData.token, {});
     res.json({ user: userData });
   }).catch((err) => {
     return res.status(500).json({
@@ -71,7 +76,7 @@ router.post('/register', auth.optional, (req, res, next) => {
     });
   }
 
-  Users.findOne({username: user.username}).then((foundUser) => {
+  Users.findOne({username: user.username }).then((foundUser) => {
     if(foundUser) {
       return res.status(400).json({
         errors: {
@@ -79,16 +84,25 @@ router.post('/register', auth.optional, (req, res, next) => {
         }
       });
     } else {
-      const finalUser = new Users(user);
+      Users.findOne({email: user.email}).then((foundUser2) => {
+        if(foundUser2) {
+          return res.status(422).json({
+            errors: {
+              email: "is taken"
+            }
+          });
+        }
+        const finalUser = new Users(user);
 
-      finalUser.setPassword(user.password);
+        finalUser.setPassword(user.password);
 
-      return finalUser.save()
-        .then(() => {
-          let userData = finalUser.toAuthJSON();
-          res.cookie('authToken', userData.token, {httpOnly: true, maxAge: (new Date().getDate() + 60)});
-          res.json({ user: userData });
-        });
+        return finalUser.save()
+          .then(() => {
+            let userData = finalUser.toAuthJSON();
+            res.cookie('authToken', userData.token, {httpOnly: true, maxAge: (new Date().getDate() + 60)});
+            res.json({ user: userData });
+          });
+      });
     }
   });
 });

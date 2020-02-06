@@ -17,7 +17,12 @@ class WebServer {
   }
 
   setupWebServer() {
-    this.app.use(cors());
+    const corsOptions = {
+      allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept']
+    };
+    //Origin, X-Requested-With, Content-Type, Accept
+    this.app.use(cors(corsOptions));
+    this.app.options('*', cors(corsOptions));
 
     this.app.use(bodyParser.json());
     this.app.use(bodyParser.urlencoded({ extended: false }));

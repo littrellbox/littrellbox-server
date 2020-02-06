@@ -9,6 +9,14 @@ const log4js = require('log4js');
 const logger = log4js.getLogger('chat');
 logger.level = 'debug';
 
+//import db models
+//we don't use these right now but they all need to be loaded at startup
+require('./models/Users');
+require('./models/Planets');
+require('./models/PlanetMembers');
+require('./models/Messages');
+require('./models/Channels');
+
 //import server modules
 const socketServer = require('./socket/SocketServer');
 const webServer = require('./web/WebServer');

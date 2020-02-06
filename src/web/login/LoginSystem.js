@@ -1,5 +1,3 @@
-const Users = require('./models/Users');
-
 //setup logging
 const log4js = require('log4js');
 const logger = log4js.getLogger('login');

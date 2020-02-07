@@ -22,10 +22,15 @@ class User {
   setupClient() {
     //get the user and send it to the client
     Users.findById(this.decodedToken.id, (err, document) => {
-      this.socket.emit("setuser", document);
-      this.ChannelHandler.setUserAndStart(document);
-      this.MessageHandler.setUserAndStart(document);
-      this.PlanetHandler.setUserAndStart(document);
+      if(!document) {
+        this.socket.emit("forcefullydeauth");
+        return;
+      } else {
+        this.socket.emit("setuser", document);
+        this.ChannelHandler.setUserAndStart(document);
+        this.MessageHandler.setUserAndStart(document);
+        this.PlanetHandler.setUserAndStart(document);
+      }
     });
   }
 

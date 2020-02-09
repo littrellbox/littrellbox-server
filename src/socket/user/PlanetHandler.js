@@ -3,8 +3,9 @@ const PlanetMembers = mongoose.model('PlanetMembers');
 const Planets = mongoose.model('Planets');
 
 class PlanetHandler {
-  constructor(socket) {
+  constructor(socket,io) {
     this.socket = socket;
+    this.io = io;
 
     this.createPlanet = this.createPlanet.bind(this);
     this.joinPlanet = this.joinPlanet.bind(this);
@@ -13,6 +14,7 @@ class PlanetHandler {
   }
 
   user = null;
+  currentPlanet = null;
 
   setUser(user) {
     this.user = user;
@@ -45,13 +47,27 @@ class PlanetHandler {
 
   joinPlanet(planetId, inviteId) {
     Planets.findById(planetId, (err, document) => {
-      if(document.invites.includes(inviteId)) {
+      let member = PlanetMembers.findOne({'$and': [{userId: this.user._id}, {planetId: planetId}]});
+      if(document.invites.includes(inviteId) && !member) {
         let member = new PlanetMembers({
           userId: this.user._id,
           planetId: planet._id
         });
         member.save();
         this.socket.emit('updateplanet', planet._id, planet);
+      }
+    });
+  }
+
+  openPlanet(planetId) {
+    Planets.findById(planetId).then((err, document) => {
+      if(document) {
+        PlanetMembers.findOne({'$and': [{userId: this.user._id}, {planetId: planetId}]}).then(() => {
+          if(this.currentPlanet !== null) {
+            this.socket.leave("planet-in-" + this.currentPlanet);
+          }
+          this.socket.emit("setplanet", document);
+        });
       }
     });
   }

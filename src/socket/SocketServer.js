@@ -32,7 +32,7 @@ class SocketServer {
       }
       logger.debug("User connected");
       socket.emit('authentication', decode);
-      this.users[socket.id] = (new User(socket, decode));
+      this.users[socket.id] = (new User(socket, io, decode));
     }.bind(this));
   }
 

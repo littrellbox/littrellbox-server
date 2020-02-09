@@ -6,13 +6,14 @@ const MessageHandler = require('./user/MessageHandler');
 const PlanetHandler = require('./user/PlanetHandler');
 
 class User {
-  constructor(socket, originalUser) {
+  constructor(socket, io, originalUser) {
     this.socket = socket;
+    this.io = io;
     this.decodedToken = originalUser;
 
-    this.ChannelHandler = new ChannelHandler(socket);
-    this.MessageHandler = new MessageHandler(socket);
-    this.PlanetHandler = new PlanetHandler(socket);
+    this.ChannelHandler = new ChannelHandler(socket, io);
+    this.MessageHandler = new MessageHandler(socket, io);
+    this.PlanetHandler = new PlanetHandler(socket, io);
     
     this.setupClient();
   }

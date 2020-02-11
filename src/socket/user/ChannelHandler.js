@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Planets = mongoose.model('Planets');
 const Channels = mongoose.model('Channels');
 
@@ -16,7 +17,7 @@ class ChannelHandler {
   }
 
   createChannel(name, planetId) {
-    Planets.findById(planetId).then((err, document) => {
+    Planets.findById(planetId).then((document) => {
       if(document && document.userId === this.user._id) {
         let channel = new Channels({
           name,
@@ -32,7 +33,7 @@ class ChannelHandler {
   }
   
   getChannel(channelId) {
-    Channels.findById(channelId).then((err, document) => {
+    Channels.findById(channelId).then((document) => {
       this.socket.emit("updatechannel", channelId, document);
     });
   }

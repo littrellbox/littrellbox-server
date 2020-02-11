@@ -2,6 +2,11 @@ const mongoose = require('mongoose');
 const PlanetMembers = mongoose.model('PlanetMembers');
 const Planets = mongoose.model('Planets');
 
+//setup logging
+const log4js = require('log4js');
+const logger = log4js.getLogger('planet');
+logger.level = 'debug';
+
 class PlanetHandler {
   constructor(socket,io) {
     this.socket = socket;
@@ -9,6 +14,7 @@ class PlanetHandler {
 
     this.createPlanet = this.createPlanet.bind(this);
     this.joinPlanet = this.joinPlanet.bind(this);
+    this.openPlanet = this.openPlanet.bind(this);
     this.getAllPlanets = this.getAllPlanets.bind(this);
     this.getPlanet = this.getPlanet.bind(this);
   }
@@ -25,6 +31,7 @@ class PlanetHandler {
 
     this.socket.on("createplanet", this.createPlanet);
     this.socket.on("joinplanet", this.joinPlanet);
+    this.socket.on("openplanet", this.openPlanet);
     this.socket.on("getplanet", this.getPlanet);
     this.socket.on("getallplanets", this.getAllPlanets);
   }
@@ -60,13 +67,17 @@ class PlanetHandler {
   }
 
   openPlanet(planetId) {
-    Planets.findById(planetId).then((err, document) => {
+    Planets.findById(planetId).then((document) => {
       if(document) {
-        PlanetMembers.findOne({'$and': [{userId: this.user._id}, {planetId: planetId}]}).then(() => {
-          if(this.currentPlanet !== null) {
-            this.socket.leave("planet-in-" + this.currentPlanet);
+        PlanetMembers.findOne({'$and': [{userId: this.user._id}, {planetId: planetId}]}).then((document2) => {
+          if(document2) {
+            if(this.currentPlanet !== null) {
+              this.socket.leave("planet-in-" + this.currentPlanet);
+            }
+            logger.debug(this.user.username + " joined " + planetId);
+            this.socket.join("planet-in-" + planetId);
+            this.socket.emit("setplanet", document);
           }
-          this.socket.emit("setplanet", document);
         });
       }
     });

@@ -74,8 +74,9 @@ class PlanetHandler {
             if(this.currentPlanet !== null) {
               this.socket.leave("planet-in-" + this.currentPlanet);
             }
+            this.createPlanet = planetId;
             logger.debug(this.user.username + " joined " + planetId);
-            this.socket.join("planet-in-" + planetId);
+            this.socket.join("planet-in-" + planetId.toString());
             this.socket.emit("setplanet", document);
           }
         });
@@ -93,7 +94,10 @@ class PlanetHandler {
     PlanetMembers.find({userId: this.user._id}, (err, documents) => {
       for(const document of documents) {
         Planets.findById(document.planetId, (err, document2) => {
-          this.socket.emit('updateplanet', document2._id, document2);
+          if(document2) {
+            this.socket.join(document.planetId.toString());
+            this.socket.emit('updateplanet', document2._id, document2);
+          }
         });
       }
     });

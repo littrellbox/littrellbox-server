@@ -1,6 +1,7 @@
 class MessageHandler {
-  constructor(socket) {
+  constructor(socket, io) {
     this.socket = socket;
+    this.io = io;
   }
 
   user = null;
@@ -8,6 +9,19 @@ class MessageHandler {
   setUserAndStart(user) {
     this.user = user;
   }
+
+  sendMessage() {
+
+  }
+
+  getMessage() {
+
+  }
+
+  getMessages() {
+
+  }
+  
 }
 
 module.exports = MessageHandler;

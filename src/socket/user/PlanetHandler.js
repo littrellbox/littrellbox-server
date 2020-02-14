@@ -71,7 +71,6 @@ class PlanetHandler {
       if(document) {
         PlanetMembers.findOne({'$and': [{userId: this.user._id}, {planetId: planetId}]}).then((document2) => {
           if(document2) {
-            console.log(this);
             if(this.currentPlanet !== null) {
               this.socket.leave("planet-in-" + this.currentPlanet);
             }

@@ -44,6 +44,7 @@ class MessageHandler {
                   content: text
                 });
                 message.save().then(() => {
+                  logger.debug(this.user._id + " has sent a message: " + text);
                   this.io.to("channel-in-" + documentChannel._id).emit('updatemessage', message._id, message);
                 });
               }
@@ -73,10 +74,11 @@ class MessageHandler {
           if(document) {
             PlanetMembers.findOne({'$and': [{userId: this.user._id}, {planetId: documentChannel.planetId}]}).then((document2) => {
               if(document2) {
-                let messages = Messages.find({channelId: channelId}).limit(50).sort({"date":-1});
-                for(const message of messages) {
-                  this.socket.emit("updatemessage", messageId, message);
-                }
+                Messages.find({channelId: channelId}).limit(50).sort({"date":1}).then((messages) => {
+                  for(const message of messages) {
+                    this.socket.emit("updatemessage", message._id, message);
+                  }
+                });
               }
             });
           }

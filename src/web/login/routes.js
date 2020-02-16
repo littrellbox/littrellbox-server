@@ -3,6 +3,22 @@ const passport = require('passport');
 const router = require('express').Router();
 const auth = require('./auth');
 const Users = mongoose.model('Users');
+const fs = require('fs');
+
+const log4js = require('log4js');
+const logger = log4js.getLogger('auth');
+logger.level = 'debug';
+
+let inviteCodes = [];
+let usingCodes = false;
+if(fs.existsSync('./invitecodes.json')) {
+  logger.warn("Using invite codes for registration!");
+  logger.warn("Users must have an invite code to register!");
+  usingCodes = true;
+  let rawdata = fs.readFileSync('./invitecodes.json');
+  inviteCodes = JSON.parse(rawdata);
+}
+
 
 router.post('/login', auth.optional, (req, res, next) => {
   const reqUser = req.body;
@@ -53,6 +69,7 @@ router.post('/register', auth.optional, (req, res, next) => {
   const user = req.body;
 
   if(!user.username) {
+    console.log("no name");
     return res.status(400).json({
       errors: {
         username: 'is required',
@@ -61,6 +78,7 @@ router.post('/register', auth.optional, (req, res, next) => {
   }
 
   if(!user.email) {
+    console.log("no email");
     return res.status(400).json({
       errors: {
         email: 'is required',
@@ -69,6 +87,7 @@ router.post('/register', auth.optional, (req, res, next) => {
   }
 
   if(!user.password) {
+    console.log("no pass");
     return res.status(400).json({
       errors: {
         password: 'is required',
@@ -76,9 +95,25 @@ router.post('/register', auth.optional, (req, res, next) => {
     });
   }
 
+  console.log(inviteCodes);
+  console.log(inviteCodes.includes(req.inviteCode));
+  console.log(req.body);
+  if(usingCodes && !inviteCodes.includes(req.body.inviteCode)) {
+    return res.status(403).json({
+      errors: {
+        password: ""
+      }
+    });
+  }
+
+  if(usingCodes) {
+    delete inviteCodes[inviteCodes.indexOf(req.body.inviteCode)];
+    fs.writeFileSync('./invitecodes.json', JSON.stringify(inviteCodes));
+  }
+
   Users.findOne({username: user.username }).then((foundUser) => {
     if(foundUser) {
-      return res.status(400).json({
+      return res.status(401).json({
         errors: {
           username: 'is taken'
         }

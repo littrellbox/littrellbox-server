@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const User = require('./User');
+const fs = require('fs');
 
 //setup logging
 const log4js = require('log4js');
@@ -12,6 +13,7 @@ class SocketServer {
 
     this.authenticateUser = this.authenticateUser.bind(this);
     this.disconnectUser = this.disconnectUser.bind(this);
+    this.getInfo = this.getInfo.bind(this);
   }
 
   users = []
@@ -21,6 +23,7 @@ class SocketServer {
       socket.on('authenticate', (token) => this.authenticateUser(token, socket));
       socket.on('disconnect', () => this.disconnectUser(socket));
       socket.on('logout', () => this.disconnectUser(socket));
+      socket.on('getinfo', () => this.getInfo(socket));
     }.bind(this));
     logger.info("Socket.IO started");
   }
@@ -34,6 +37,13 @@ class SocketServer {
       socket.emit('authentication', decode);
       this.users[socket.id] = (new User(socket, this.io, decode));
     }.bind(this));
+  }
+
+  getInfo(socket) {
+    socket.emit("setinfo", {
+      version: global.version,
+      inviteCodeReq: fs.existsSync('./invitecodes.json')
+    });
   }
 
   disconnectUser(socket) {

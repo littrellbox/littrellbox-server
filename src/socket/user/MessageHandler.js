@@ -74,8 +74,8 @@ class MessageHandler {
           if(document) {
             PlanetMembers.findOne({'$and': [{userId: this.user._id}, {planetId: documentChannel.planetId}]}).then((document2) => {
               if(document2) {
-                Messages.find({channelId: channelId}).limit(50).sort({"date":1}).then((messages) => {
-                  for(const message of messages) {
+                Messages.find({channelId: channelId}).limit(50).sort({"date":-1}).then((messages) => {
+                  for(const message of messages.reverse()) {
                     this.socket.emit("updatemessage", message._id, message);
                   }
                 });

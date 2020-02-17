@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const PlanetMembers = mongoose.model('PlanetMembers');
 const Planets = mongoose.model('Planets');
+const randomNumber = require("random-number-csprng");
 
 //setup logging
 const log4js = require('log4js');
@@ -17,6 +18,7 @@ class PlanetHandler {
     this.openPlanet = this.openPlanet.bind(this);
     this.getAllPlanets = this.getAllPlanets.bind(this);
     this.getPlanet = this.getPlanet.bind(this);
+    this.getInvite = this.getInvite.bind(this);
   }
 
   user = null;
@@ -34,6 +36,7 @@ class PlanetHandler {
     this.socket.on("openplanet", this.openPlanet);
     this.socket.on("getplanet", this.getPlanet);
     this.socket.on("getallplanets", this.getAllPlanets);
+    this.socket.on("getinvite", this.getInvite);
   }
 
   createPlanet(planetName) {
@@ -99,6 +102,18 @@ class PlanetHandler {
             this.socket.emit('updateplanet', document2._id, document2);
           }
         });
+      }
+    });
+  }
+
+  getInvite(planetId) {
+    Planets.findById(planetId).then((document) => {
+      if(document && document.invites.length === 0 && document.userId === this.user._id) {
+        document.invites.push(randomNumber(1, 9999999999999999));
+        document.save();
+        this.socket.emit("recvinvite", document.invites[0]);
+      } else if(document && document.userId === this.user._id) {
+        this.socket.emit("recvinvite", document.invites[0]);
       }
     });
   }

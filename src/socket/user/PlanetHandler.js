@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const PlanetMembers = mongoose.model('PlanetMembers');
 const Planets = mongoose.model('Planets');
 const randomNumber = require("random-number-csprng");
+const uuidv4 = require('uuid/v4');
 
 //setup logging
 const log4js = require('log4js');
@@ -107,19 +108,13 @@ class PlanetHandler {
   }
 
   getInvite(planetId) {
-    console.log("a");
     Planets.findById(planetId).then((document) => {
-      console.log("b");
       if(document && document.invites.length === 0 && document.userId === this.user._id.toString()) {
-        console.log("c");
-        randomNumber(1, 9999999999).then((number) => {
-          document.invites.push(number);
-          document.save();
-          logger.debug("Sending " + document._id + " invite to " + this.user._id);
-          this.socket.emit("recvinvite", document.invites[0]);
-        });
+        document.invites.push(uuidv4());
+        document.save();
+        logger.debug("Sending " + document._id + " invite to " + this.user._id);
+        this.socket.emit("recvinvite", document.invites[0]);
       } else if(document && document.userId === this.user._id.toString()) {
-        console.log("c2");
         logger.debug("Sending " + document._id + " invite to " + this.user._id);
         this.socket.emit("recvinvite", document.invites[0]);
       }

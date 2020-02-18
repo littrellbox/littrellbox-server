@@ -58,12 +58,9 @@ class PlanetHandler {
   }
 
   joinPlanet(planetId, inviteId) {
-    console.log("a")
     Planets.findById(planetId, (err, document) => {
-      console.log("b")
-      let member = PlanetMembers.findOne({'$and': [{userId: this.user._id}, {planetId: planetId}]}).then((member) => {
+      PlanetMembers.findOne({'$and': [{userId: this.user._id}, {planetId: planetId}]}).then((member) => {
         if(document.invites.includes(inviteId) && !member) {
-          console.log("c")
           let member = new PlanetMembers({
             userId: this.user._id,
             planetId: document._id

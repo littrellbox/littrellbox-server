@@ -60,7 +60,7 @@ class MessageHandler {
       if(documentMessage) {
         PlanetMembers.findOne({'$and': [{userId: this.user._id}, {planetId: documentMessage.planetId}]}).then((document2) => {
           if(document2) {
-            this.socket.emit("updatemessage", messageId, message);
+            this.socket.emit("recvmessage", messageId, message);
           }
         });
       }
@@ -75,9 +75,7 @@ class MessageHandler {
             PlanetMembers.findOne({'$and': [{userId: this.user._id}, {planetId: documentChannel.planetId}]}).then((document2) => {
               if(document2) {
                 Messages.find({channelId: channelId}).limit(50).sort({"date":-1}).then((messages) => {
-                  for(const message of messages.reverse()) {
-                    this.socket.emit("updatemessage", message._id, message);
-                  }
+                  this.socket.emit("recvbatchmessage", messages.reverse());
                 });
               }
             });

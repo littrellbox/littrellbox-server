@@ -1,8 +1,10 @@
 //import libraries
 const express = require('express');
 const http = require('http');
+const https = require('https');
 const mongoose = require('mongoose');
 const redisAdapter = require('socket.io-redis');
+const fs = require('fs');
 
 //setup logging
 const log4js = require('log4js');
@@ -42,7 +44,17 @@ class ChatServer {
     startServer() {
         logger.info("Starting chat server");
         this.app = express();
+        if(process.env.HTTPS_CERT) {
+            this.http = https.createServer({
+                key: fs.readFileSync(process.env.HTTPS_KEY),
+                cert: fs.readFileSync(proccess.env.HTTPS_CERT),
+                passphrase: process.env.HTTPS_PASSPHRASE
+            });
+        } else {
+            this.http = http.createServer(this.app);
+        }
         this.http = http.createServer(this.app);
+
         this.io = require('socket.io')(this.http);
         
         if(process.env.REDIS_HOST) {
@@ -63,7 +75,7 @@ class ChatServer {
             
             this.http.listen(parseInt(process.env.PORT), this.httpServerStarted);
         }).catch((e) => {
-            logger.fatal("Connecting to database failed, exiting...");
+            logger.fatal("A fatal error occured, exiting...");
             logger.debug(e);
             process.exit();
         });

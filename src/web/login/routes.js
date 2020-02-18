@@ -94,10 +94,7 @@ router.post('/register', auth.optional, (req, res, next) => {
       },
     });
   }
-
-  console.log(inviteCodes);
-  console.log(inviteCodes.includes(req.inviteCode));
-  console.log(req.body);
+  
   if(usingCodes && !inviteCodes.includes(req.body.inviteCode)) {
     return res.status(403).json({
       errors: {

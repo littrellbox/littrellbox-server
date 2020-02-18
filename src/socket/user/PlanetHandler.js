@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 const PlanetMembers = mongoose.model('PlanetMembers');
 const Planets = mongoose.model('Planets');
-const randomNumber = require("random-number-csprng");
 const uuidv4 = require('uuid/v4');
 
 //setup logging
@@ -19,6 +18,7 @@ class PlanetHandler {
     this.openPlanet = this.openPlanet.bind(this);
     this.getAllPlanets = this.getAllPlanets.bind(this);
     this.getPlanet = this.getPlanet.bind(this);
+    this.getInvitePlanet = this.getInvitePlanet.bind(this);
     this.getInvite = this.getInvite.bind(this);
   }
 
@@ -37,6 +37,7 @@ class PlanetHandler {
     this.socket.on("openplanet", this.openPlanet);
     this.socket.on("getplanet", this.getPlanet);
     this.socket.on("getallplanets", this.getAllPlanets);
+    this.socket.on("getinviteplanet", this.getInvitePlanet);
     this.socket.on("getinvite", this.getInvite);
   }
 
@@ -57,16 +58,22 @@ class PlanetHandler {
   }
 
   joinPlanet(planetId, inviteId) {
+    console.log("a")
     Planets.findById(planetId, (err, document) => {
-      let member = PlanetMembers.findOne({'$and': [{userId: this.user._id}, {planetId: planetId}]});
-      if(document.invites.includes(inviteId) && !member) {
-        let member = new PlanetMembers({
-          userId: this.user._id,
-          planetId: planet._id
-        });
-        member.save();
-        this.socket.emit('updateplanet', planet._id, planet);
-      }
+      console.log("b")
+      let member = PlanetMembers.findOne({'$and': [{userId: this.user._id}, {planetId: planetId}]}).then((member) => {
+        if(document.invites.includes(inviteId) && !member) {
+          console.log("c")
+          let member = new PlanetMembers({
+            userId: this.user._id,
+            planetId: document._id
+          });
+          member.save();
+          this.socket.emit('updateplanet', document._id, document);
+          this.socket.join("planet-in-" + planetId.toString());
+          this.socket.emit("setplanet", document);
+        }
+      });
     });
   }
 
@@ -118,6 +125,12 @@ class PlanetHandler {
         logger.debug("Sending " + document._id + " invite to " + this.user._id);
         this.socket.emit("recvinvite", document.invites[0]);
       }
+    });
+  }
+  
+  getInvitePlanet(inviteId) {
+    Planets.find({ invites: inviteId }).then((document) => {
+      this.socket.emit("setinviteplanet", document);
     });
   }
 }

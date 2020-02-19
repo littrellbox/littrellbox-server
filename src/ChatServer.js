@@ -56,7 +56,6 @@ class ChatServer {
         } else {
             this.http = http.createServer(this.app);
         }
-        this.http = http.createServer(this.app);
 
         this.io = require('socket.io')(this.http);
         

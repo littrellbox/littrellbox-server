@@ -33,6 +33,9 @@ class SocketServer {
       if(err) {
         socket.emit('auth-error');
       }
+      if(!decode) {
+        return;
+      }
       logger.debug("User connected");
       socket.emit('authentication', decode);
       this.users[socket.id] = (new User(socket, this.io, decode));

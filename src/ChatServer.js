@@ -50,7 +50,7 @@ class ChatServer {
         if(process.env.HTTPS_CERT) {
             this.http = https.createServer({
                 key: fs.readFileSync(process.env.HTTPS_KEY, 'utf8'),
-                cert: fs.readFileSync(proccess.env.HTTPS_CERT, 'utf8'),
+                cert: fs.readFileSync(process.env.HTTPS_CERT, 'utf8'),
                 ca: fs.readFileSync(process.env.HTTPS_CA, 'utf8')
             }, this.app);
         } else {

@@ -49,10 +49,10 @@ class ChatServer {
         this.app = express();
         if(process.env.HTTPS_CERT) {
             this.http = https.createServer({
-                key: fs.readFileSync(process.env.HTTPS_KEY),
-                cert: fs.readFileSync(proccess.env.HTTPS_CERT),
-                passphrase: process.env.HTTPS_PASSPHRASE
-            });
+                key: fs.readFileSync(process.env.HTTPS_KEY, 'utf8'),
+                cert: fs.readFileSync(proccess.env.HTTPS_CERT, 'utf8'),
+                ca: fs.readFileSync(process.env.HTTPS_CA, 'utf8')
+            }, this.app);
         } else {
             this.http = http.createServer(this.app);
         }

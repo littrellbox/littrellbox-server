@@ -124,16 +124,25 @@ router.post('/register', auth.optional, (req, res, next) => {
             }
           });
         }
-        const finalUser = new Users(user);
 
-        finalUser.setPassword(user.password);
+        Users.count({}).then((count) => {
+          const finalUser = new Users(user);
 
-        return finalUser.save()
-          .then(() => {
-            let userData = finalUser.toAuthJSON();
-            res.cookie('authToken', userData.token, {httpOnly: true, maxAge: (new Date().getDate() + 60)});
-            res.json({ user: userData });
-          });
+          if(count === 0) {
+            finalUser.permission = 255;
+          } else {
+            finalUser.permission = 1;
+          }
+
+          finalUser.setPassword(user.password);
+
+          return finalUser.save()
+            .then(() => {
+              let userData = finalUser.toAuthJSON();
+              res.cookie('authToken', userData.token, {httpOnly: true, maxAge: (new Date().getDate() + 60)});
+              res.json({ user: userData });
+            });
+        });
       });
     }
   });

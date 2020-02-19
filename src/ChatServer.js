@@ -27,7 +27,10 @@ class ChatServer {
     //TODO: Load from ENV variables
     mongooseOptions = {
         useUnifiedTopology: true,
-        useNewUrlParser: true
+        useNewUrlParser: true,
+        authSource: process.env.MONGO_AUTH_SOURCE,
+        user: process.env.MONGO_USER,
+        pass: process.env.MONGO_PASS
     }
 
     app = null;

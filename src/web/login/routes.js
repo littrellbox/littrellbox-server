@@ -69,7 +69,6 @@ router.post('/register', auth.optional, (req, res, next) => {
   const user = req.body;
 
   if(!user.username) {
-    console.log("no name");
     return res.status(400).json({
       errors: {
         username: 'is required',
@@ -78,7 +77,6 @@ router.post('/register', auth.optional, (req, res, next) => {
   }
 
   if(!user.email) {
-    console.log("no email");
     return res.status(400).json({
       errors: {
         email: 'is required',
@@ -87,10 +85,18 @@ router.post('/register', auth.optional, (req, res, next) => {
   }
 
   if(!user.password) {
-    console.log("no pass");
     return res.status(400).json({
       errors: {
         password: 'is required',
+      },
+    });
+  }
+
+  var letterNumber = /^[0-9a-zA-Z]+$/;
+  if(user.username.value.match(letterNumber)) {
+    return res.status(400).json({
+      errors: {
+        username: 'abc123 only',
       },
     });
   }

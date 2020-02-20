@@ -4,6 +4,7 @@ const fs = require('fs')
 const ChannelHandler = require('./user/ChannelHandler');
 const MessageHandler = require('./user/MessageHandler');
 const PlanetHandler = require('./user/PlanetHandler');
+const UserHandler = require('./user/UserHandler');
 
 class User {
   constructor(socket, io, originalUser) {
@@ -14,6 +15,7 @@ class User {
     this.ChannelHandler = new ChannelHandler(socket, io);
     this.MessageHandler = new MessageHandler(socket, io);
     this.PlanetHandler = new PlanetHandler(socket, io);
+    this.UserHandler = new UserHandler(socket, io);
     
     this.getMOTD = this.getMOTD.bind(this);
 
@@ -30,6 +32,7 @@ class User {
         return;
       } else {
         this.socket.emit("setuser", document);
+        this.UserHandler.setUserAndStart(document);
         this.ChannelHandler.setUserAndStart(document);
         this.MessageHandler.setUserAndStart(document);
         this.PlanetHandler.setUserAndStart(document);

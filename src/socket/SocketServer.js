@@ -20,9 +20,10 @@ class SocketServer {
 
   setupSocketServer() {
     this.io.on('connection', function(socket){
+      let id = socket.id
       socket.on('authenticate', (token) => this.authenticateUser(token, socket));
-      socket.on('disconnect', () => this.disconnectUser(socket));
-      socket.on('logout', () => this.disconnectUser(socket));
+      socket.on('disconnect', () => this.disconnectUser(id));
+      socket.on('logout', () => socket.disconnect());
       socket.on('getinfo', () => this.getInfo(socket));
     }.bind(this));
     logger.info("Socket.IO started");
@@ -49,10 +50,10 @@ class SocketServer {
       inviteCodeReq: fs.existsSync('./invitecodes.json')
     });
   }
-
+  
   disconnectUser(socket) {
     //delete the User object
-    this.users[socket.id] = null;
+    delete this.users[socket.id];
   }
 }
 

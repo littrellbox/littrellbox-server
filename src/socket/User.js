@@ -43,6 +43,12 @@ class User {
       this.socket.emit("recvmotd", fs.readFileSync("motd.md").toString())
     }
   }
+
+  deleteChildren() {
+    delete this.ChannelHandler;
+    delete this.MessageHandler;
+    delete this.PlanetHandler;
+  }
 }
 
 module.exports = User;

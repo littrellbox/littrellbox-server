@@ -108,3 +108,6 @@ dist
 
 # Ignore invite codes
 invitecodes.json
+
+# Ignore MOTD
+motd.md

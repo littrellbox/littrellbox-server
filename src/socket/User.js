@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const Users = mongoose.model('Users');
-
+const fs = require('fs')
 const ChannelHandler = require('./user/ChannelHandler');
 const MessageHandler = require('./user/MessageHandler');
 const PlanetHandler = require('./user/PlanetHandler');
@@ -15,6 +15,8 @@ class User {
     this.MessageHandler = new MessageHandler(socket, io);
     this.PlanetHandler = new PlanetHandler(socket, io);
     
+    this.getMOTD = this.getMOTD.bind(this);
+
     this.setupClient();
   }
 
@@ -31,10 +33,16 @@ class User {
         this.ChannelHandler.setUserAndStart(document);
         this.MessageHandler.setUserAndStart(document);
         this.PlanetHandler.setUserAndStart(document);
+        this.socket.on("getmotd", this.getMOTD);
       }
     });
   }
 
+  getMOTD() {
+    if(fs.existsSync("motd.md")) {
+      this.socket.emit("recvmotd", fs.readFileSync("motd.md").toString())
+    }
+  }
 }
 
 module.exports = User;

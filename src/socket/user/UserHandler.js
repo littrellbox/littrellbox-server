@@ -15,6 +15,7 @@ class UserHandler {
     this.getUser = this.getCurrentUser.bind(this);
     this.subscribeToUser = this.subscribeToUser.bind(this);
     this.unsubscribeFromUser = this.unsubscribeFromUser.bind(this);
+    this.unsubscribeFromAllUsers = this.unsubscribeFromAllUsers.bind(this);
   }
 
   user = null;
@@ -27,6 +28,7 @@ class UserHandler {
     this.socket.on("getuser", this.getUser);
     this.socket.on("subscribetouser", this.subscribeToUser);
     this.socket.on("unsubscribefromuser", this.unsubscribeFromUser);
+    this.socket.on("unsubscribefromallusers", this.unsubscribeFromAllUsers);
 
     this.socket.emit("acceptingUsers");
   }
@@ -64,6 +66,13 @@ class UserHandler {
       this.socket.leave("usersub-" + id.toString());
       delete this.subscribedIds[this.subscribedIds.indexOf(id)];
     }
+  }
+
+  unsubscribeFromAllUsers() {
+    for(id of this.subscribedIds) {
+      this.socket.leave("usersub-" + id);
+    }
+    this.subscribedIds = [];
   }
 }
 

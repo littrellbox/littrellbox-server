@@ -20,7 +20,7 @@ class SocketServer {
 
   setupSocketServer() {
     this.io.on('connection', function(socket){
-      let id = socket.id
+      let id = socket.id;
       socket.on('authenticate', (token) => this.authenticateUser(token, socket));
       socket.on('disconnect', () => this.disconnectUser(id));
       socket.on('logout', () => socket.disconnect());

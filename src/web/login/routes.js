@@ -130,7 +130,7 @@ router.post('/register', auth.optional, (req, res, next) => {
           });
         }
 
-        Users.count({}).then((count) => {
+        Users.estimatedDocumentCount().then((count) => {
           const finalUser = new Users(user);
 
           if(count === 0) {

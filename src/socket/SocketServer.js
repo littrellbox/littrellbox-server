@@ -45,6 +45,7 @@ class SocketServer {
   getInfo(socket) {
     socket.emit("setinfo", {
       version: global.version,
+      serverType: "littrellbox-server",
       inviteCodeReq: fs.existsSync('./invitecodes.json')
     });
   }

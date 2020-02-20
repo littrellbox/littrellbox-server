@@ -28,6 +28,7 @@ class ChannelHandler {
     this.socket.on("getchannel", this.getChannel);
     this.socket.on("openchannel", this.openChannel);
     this.socket.on("getallchannels", this.getAllChannels);
+    this.socket.emit("acceptingChannels");
   }
 
   createChannel(name, planetId) {

@@ -27,6 +27,7 @@ class MessageHandler {
     this.socket.on("sendmessage", this.sendMessage);
     this.socket.on("getmessage", this.getMessage);
     this.socket.on("getmessages", this.getMessages);
+    this.socket.emit("acceptingMessages");
   }
 
   sendMessage(text, channelId) {

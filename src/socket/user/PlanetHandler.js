@@ -39,6 +39,7 @@ class PlanetHandler {
     this.socket.on("getallplanets", this.getAllPlanets);
     this.socket.on("getinviteplanet", this.getInvitePlanet);
     this.socket.on("getinvite", this.getInvite);
+    this.socket.emit("acceptingPlanets");
   }
 
   createPlanet(planetName) {

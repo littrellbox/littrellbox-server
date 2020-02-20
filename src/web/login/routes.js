@@ -92,8 +92,7 @@ router.post('/register', auth.optional, (req, res, next) => {
     });
   }
 
-  var letterNumber = /^[0-9a-zA-Z]+$/;
-  if(user.username.value.match(letterNumber)) {
+  if(!(/^[A-Za-z0-9]+$/.test(user.username))) {
     return res.status(400).json({
       errors: {
         username: 'abc123 only',

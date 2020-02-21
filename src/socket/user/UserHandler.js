@@ -54,17 +54,17 @@ class UserHandler {
   }
 
   subscribeToUser(id) {
-    if(!this.subscribedIds.includes(id)) {
-      Users.findById(id).then((document) => {
-        if(document) {
-          delete document.hash;
-          delete document.salt;
-          this.socket.emit("updateuser", document);
+    Users.findById(id).then((document) => {
+      if(document) {
+        delete document.hash;
+        delete document.salt;
+        if(!this.subscribedIds.includes(id)) {
           this.socket.join("usersub-" + document._id.toString());
           this.subscribedIds.push(id);
         }
-      });
-    }
+        this.socket.emit("updateuser", document);
+      }
+    });
   }
 
   unsubscribeFromUser(id) {

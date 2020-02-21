@@ -23,11 +23,14 @@ require('./models/Channels');
 const socketServer = require('./socket/SocketServer');
 const webServer = require('./web/WebServer');
 
+const Users = mongoose.model("Users")
+
 class ChatServer {
     //TODO: Load from ENV variables
     mongooseOptions = {
         useUnifiedTopology: true,
         useNewUrlParser: true,
+        useFindAndModify: false,
         authSource: process.env.MONGO_AUTH_SOURCE,
         user: process.env.MONGO_USER,
         pass: process.env.MONGO_PASS
@@ -72,10 +75,16 @@ class ChatServer {
             logger.info("Connected to database");
             this.webServer = new webServer(this.app);
             this.webServer.setupWebServer();
-            this.socketServer = new socketServer(this.io);
-            this.socketServer.setupSocketServer();
+            //The following code is a Bad Idea and should be changed at some point.
+            //Make sure the sessionCount for all users is 0
+            logger.info("Validating user records... (this could take a long time)");
+            Users.updateMany({}, {sessionCount: 0}).then(() => {
+                this.socketServer = new socketServer(this.io);
+                this.socketServer.setupSocketServer();
             
-            this.http.listen(parseInt(process.env.PORT), this.httpServerStarted);
+                this.http.listen(parseInt(process.env.PORT), this.httpServerStarted);
+            });
+            
         }).catch((e) => {
             logger.fatal("A fatal error occured, exiting...");
             logger.debug(e);

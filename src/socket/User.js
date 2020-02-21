@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const Users = mongoose.model('Users');
-const fs = require('fs')
+const fs = require('fs');
 const ChannelHandler = require('./user/ChannelHandler');
 const MessageHandler = require('./user/MessageHandler');
 const PlanetHandler = require('./user/PlanetHandler');
@@ -31,20 +31,32 @@ class User {
         this.socket.emit("forcefullydeauth");
         return;
       } else {
-        this.socket.emit("setuser", document);
         this.UserHandler.setUserAndStart(document);
         this.ChannelHandler.setUserAndStart(document);
         this.MessageHandler.setUserAndStart(document);
         this.PlanetHandler.setUserAndStart(document);
         this.socket.on("getmotd", this.getMOTD);
+        Users.findByIdAndUpdate(document._id, {"$inc": {sessionCount: 1}}, {new: true}).then((documentNew) => {
+
+          this.io.to("usersub-" + documentNew._id.toString()).emit("updateuser", documentNew);
+          this.socket.emit("setuser", documentNew);
+        });
       }
     });
   }
 
   getMOTD() {
     if(fs.existsSync("motd.md")) {
-      this.socket.emit("recvmotd", fs.readFileSync("motd.md").toString())
+      this.socket.emit("recvmotd", fs.readFileSync("motd.md").toString());
     }
+  }
+
+  setOffline(afterCallback) {
+    Users.findByIdAndUpdate(this.decodedToken.id, {"$inc": {sessionCount: -1}}, {new: true}).then((documentNew) => {
+      this.io.to("usersub-" + documentNew._id.toString()).emit("updateuser", documentNew);
+      this.socket.emit("setuser", documentNew);
+      afterCallback();
+    });
   }
 
   deleteChildren() {

@@ -51,9 +51,8 @@ class SocketServer {
     });
   }
   
-  disconnectUser(socket) {
-    //delete the User object
-    delete this.users[socket.id];
+  disconnectUser(id) {
+    this.users[id].setOffline(() => {delete this.users[id];});
   }
 }
 

@@ -54,7 +54,7 @@ class UserHandler {
       Users.findById(id).then((document) => {
         if(document) {
           this.socket.emit("updateuser", document);
-          this.socket.join("usersub-" + id.toString());
+          this.socket.join("usersub-" + document._id.toString());
           this.subscribedIds.push(id);
         }
       });
@@ -64,14 +64,14 @@ class UserHandler {
   unsubscribeFromUser(id) {
     if(this.subscribedIds.includes(id)) {
       this.socket.leave("usersub-" + id.toString());
-      delete this.subscribedIds[this.subscribedIds.indexOf(id)];
+      this.subscribedIds[this.subscribedIds.indexOf(id)].splice(indexOf(id), 1);;
     }
   }
 
   unsubscribeFromAllUsers() {
-    for(id of this.subscribedIds) {
+    this.subscribedIds.forEach((id) => {
       this.socket.leave("usersub-" + id);
-    }
+    });
     this.subscribedIds = [];
   }
 }

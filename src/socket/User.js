@@ -37,7 +37,8 @@ class User {
         this.PlanetHandler.setUserAndStart(document);
         this.socket.on("getmotd", this.getMOTD);
         Users.findByIdAndUpdate(document._id, {"$inc": {sessionCount: 1}}, {new: true}).then((documentNew) => {
-
+          delete documentNew.hash;
+          delete documentNew.salt;
           this.io.to("usersub-" + documentNew._id.toString()).emit("updateuser", documentNew);
           this.socket.emit("setuser", documentNew);
         });
@@ -53,6 +54,8 @@ class User {
 
   setOffline(afterCallback) {
     Users.findByIdAndUpdate(this.decodedToken.id, {"$inc": {sessionCount: -1}}, {new: true}).then((documentNew) => {
+      delete documentNew.hash;
+      delete documentNew.salt;
       this.io.to("usersub-" + documentNew._id.toString()).emit("updateuser", documentNew);
       this.socket.emit("setuser", documentNew);
       afterCallback();

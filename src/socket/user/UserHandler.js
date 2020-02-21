@@ -36,6 +36,8 @@ class UserHandler {
   getUser(id) {
     Users.findById(id).then((document) => {
       if(document) {
+        delete document.hash;
+        delete document.salt;
         this.socket.emit("updateuser", document);
       }
     });
@@ -44,6 +46,8 @@ class UserHandler {
   getCurrentUser() {
     Users.findById(this.user._id).then((document) => {
       if(document) {
+        delete document.hash;
+        delete document.salt;
         this.socket.emit("setuser", document);
       }
     });
@@ -53,6 +57,8 @@ class UserHandler {
     if(!this.subscribedIds.includes(id)) {
       Users.findById(id).then((document) => {
         if(document) {
+          delete document.hash;
+          delete document.salt;
           this.socket.emit("updateuser", document);
           this.socket.join("usersub-" + document._id.toString());
           this.subscribedIds.push(id);

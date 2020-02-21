@@ -52,7 +52,9 @@ class SocketServer {
   }
   
   disconnectUser(id) {
-    this.users[id].setOffline(() => {delete this.users[id];});
+    if(this.users[id]) {
+      this.users[id].setOffline(() => {delete this.users[id];});
+    }
   }
 }
 

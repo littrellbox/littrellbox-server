@@ -78,7 +78,7 @@ class ChatServer {
             //The following code is a Bad Idea and should be changed at some point.
             //Make sure the sessionCount for all users is 0
             logger.info("Validating user records... (this could take a long time)");
-            Users.updateMany({}, {sessionCount: 0}).then(() => {
+            Users.updateMany({sessionServers: process.env.UUID}, {"$pull": {sessionServers: process.env.UUID.toString()}}).then(() => {
                 this.socketServer = new socketServer(this.io);
                 this.socketServer.setupSocketServer();
             

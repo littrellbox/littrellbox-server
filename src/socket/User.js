@@ -36,10 +36,8 @@ class User {
         this.MessageHandler.setUserAndStart(document);
         this.PlanetHandler.setUserAndStart(document);
         this.socket.on("getmotd", this.getMOTD);
-        Users.findByIdAndUpdate(document._id, {"$inc": {sessionCount: 1}}, {new: true}).then((documentNew) => {
-          delete documentNew.hash;
-          delete documentNew.salt;
-          this.io.to("usersub-" + documentNew._id.toString()).emit("updateuser", documentNew);
+        Users.findByIdAndUpdate(document._id, {'$push': {sessionServers: process.env.UUID.toString()}}, {new: true}).then((documentNew) => {
+          this.io.to("usersub-" + documentNew._id.toString()).emit("updateuser", documentNew.sanitize());
           this.socket.emit("setuser", documentNew);
         });
       }
@@ -53,12 +51,12 @@ class User {
   }
 
   setOffline(afterCallback) {
-    Users.findByIdAndUpdate(this.decodedToken.id, {"$inc": {sessionCount: -1}}, {new: true}).then((documentNew) => {
-      delete documentNew.hash;
-      delete documentNew.salt;
-      this.io.to("usersub-" + documentNew._id.toString()).emit("updateuser", documentNew);
-      this.socket.emit("setuser", documentNew);
-      afterCallback();
+    Users.findOneAndUpdate({sessionServers: process.env.UUID.toString()}, {"$unset": {"sessionServers.$": ""}}, {new: true}).then((document) => {
+      Users.findByIdAndUpdate(this.decodedToken.id, {"$pull": {sessionServers: null}}, {new: true}).then((documentNew) => {
+        this.io.to("usersub-" + documentNew._id.toString()).emit("updateuser", documentNew.sanitize());
+        this.socket.emit("setuser", documentNew);
+        afterCallback();
+      });
     });
   }
 

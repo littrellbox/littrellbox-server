@@ -10,7 +10,7 @@ const UsersSchema = new Schema({
   hash: String,
   salt: String,
   permission: Number,
-  sessionCount: {type: Number, default: 0}
+  sessionServers: {type: [String], default: []}
 });
 
 UsersSchema.methods.setPassword = function(password) {
@@ -21,6 +21,14 @@ UsersSchema.methods.setPassword = function(password) {
 UsersSchema.methods.validatePassword = function(password) {
   const hash = crypto.pbkdf2Sync(password, this.salt, 10000, 512, 'sha512').toString('hex');
   return this.hash === hash;
+};
+
+UsersSchema.methods.sanitize = function() {
+  return {
+    username: this.username,
+    permission: this.permission,
+    sessionServers: this.sessionServers
+  };
 };
 
 UsersSchema.methods.generateJWT = function() {

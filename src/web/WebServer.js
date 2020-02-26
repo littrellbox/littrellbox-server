@@ -1,6 +1,7 @@
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const loginSystem = require('./login/LoginSystem');
+const fileSystem = require('./files/FileSystem');
 
 let cors = require('cors');
 
@@ -11,6 +12,7 @@ logger.level = 'debug';
 
 class WebServer {
   loginSystem = null;
+  fileSystem = null;
 
   constructor(app) {
     this.app = app;
@@ -35,6 +37,9 @@ class WebServer {
 
     this.loginSystem = new loginSystem(this.app);
     this.loginSystem.setupLogin();
+
+    this.fileSystem = new fileSystem(this.app);
+    this.fileSystem.setupFiles();
 
     logger.info("Express setup completed");
   }

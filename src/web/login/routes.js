@@ -54,7 +54,7 @@ router.post('/login', auth.optional, (req, res, next) => {
     const expirationDate = new Date(today);
     expirationDate.setDate(today.getDate() + 60);
 
-    res.cookie('authToken', userData.token, {});
+    res.cookie('authToken', userData.token, {httpOnly: true, maxAge: (new Date().getDate() + 60)});
     res.json({ user: userData });
   }).catch((err) => {
     return res.status(500).json({

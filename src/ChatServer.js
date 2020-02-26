@@ -18,12 +18,13 @@ require('./models/Planets');
 require('./models/PlanetMembers');
 require('./models/Messages');
 require('./models/Channels');
+require('./models/Files');
 
 //import server modules
 const socketServer = require('./socket/SocketServer');
 const webServer = require('./web/WebServer');
 
-const Users = mongoose.model("Users")
+const Users = mongoose.model("Users");
 
 class ChatServer {
     //TODO: Load from ENV variables

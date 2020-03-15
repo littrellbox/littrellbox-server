@@ -51,7 +51,7 @@ router.post('/upload/file', auth.required, (req, res, next) => {
         return;
       }
       const buffer = fs.readFileSync(path);
-      const data = await uploadFile(buffer, req.payload.id, files.file[0].headers['content-type']);
+      const data = await uploadFile(buffer, req.payload.id, files.file[0].headers['name'], files.file[0].headers['content-type']);
       res.statusCode = 200;
       res.end(data.Location);
     } catch (error) {
@@ -63,14 +63,39 @@ router.post('/upload/file', auth.required, (req, res, next) => {
 });
 
 router.post('/upload/pfp', auth.required, (req, res, next) => {
+  const form = new multiparty.Form();
   
+  form.parse(req, async (error, fields, files) => {
+    if (error) throw new Error(error);
+    try {
+      const path = files.file[0].path;
+      if(files.file[0].size > 8*1024*1024) {
+        res.statusCode = 400;
+        res.end("file_too_big");
+        return;
+      }
+      if(!checkIsBrowserRenderable(files.file[0].headers['content-type'])) {
+        response.statusCode = 400;
+        response.end("invalid_file_type");
+        return;
+      }
+      const buffer = fs.readFileSync(path);
+      const data = await uploadFile(buffer, "pfp", files.file[0].headers['name'], files.file[0].headers['content-type']);
+      res.statusCode = 200;
+      res.end(data.Location);
+    } catch (error) {
+      res.statusCode = 500;
+      logger.error(error);
+      res.end(error.toString());
+    }
+  });
 });
 
-router.get('/get/download/:file', auth.optional, (req, res, next) => {
+router.get('/get/download/:file', (req, res, next) => {
 
 });
 
-router.get('/get/grab/:file', auth.optional, (req, res, next) => {
+router.get('/get/grab/:file', (req, res, next) => {
   
 });
 

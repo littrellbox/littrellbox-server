@@ -50,10 +50,22 @@ router.post('/upload/file', auth.required, (req, res, next) => {
         res.end("file_too_big");
         return;
       }
-      const buffer = fs.readFileSync(path);
-      const data = await uploadFile(buffer, req.payload.id, files.file[0].headers['name'], files.file[0].headers['content-type']);
-      res.statusCode = 200;
-      res.end(data.Location);
+      let file = new Files({
+        fileType: files.file[0].headers['content-type'],
+        fileName: files.file[0].headers['name']
+      });
+      console.log(req);
+      file.save().then(async (document) => {
+        const buffer = fs.readFileSync(path);
+        const data = await uploadFile(buffer, req.payload.id + "/" + document._id.toString(), files.file[0].headers['name'], files.file[0].headers['content-type']);
+        document.fileURL = data.Location;
+        document.save().then((document) => {
+          res.statusCode = 200;
+          res.end(document._id);
+        });
+      });
+      res.statusCode = 500;
+      res.end("unkerr");
     } catch (error) {
       res.statusCode = 500;
       logger.error(error);

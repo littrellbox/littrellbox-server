@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
 const FilesSchema = new Schema({
-  messageId: String,
+  fileOwner: String,
   fileURL: String,
   fileType: String,
   fileName: String

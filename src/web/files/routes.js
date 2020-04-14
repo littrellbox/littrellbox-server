@@ -1,12 +1,12 @@
 const mongoose = require('mongoose');
 const router = require('express').Router();
-const auth = require('../login/auth');
 const Files = mongoose.model('Files');
 const fs = require('fs');
 const request = require('request');
 const AWS = require('aws-sdk');
 const bluebird = require('bluebird');
 const multiparty = require('multiparty');
+const jwt = require('jsonwebtoken');
 
 const log4js = require('log4js');
 const logger = log4js.getLogger('files');
@@ -27,7 +27,7 @@ const uploadFile = (buffer, folder, name, type) => {
   const params = { 
     ACL: 'public-read',
     Body: buffer,
-    Bucket: bucket,
+    Bucket: process.env.S3_BUCKET,
     ContentType: type,
     Key: `${folder}/${name}`
   };
@@ -38,34 +38,41 @@ const checkIsBrowserRenderable = function(filetype) {
   return filetype === "image/jpeg" || filetype === "image/gif" || filetype === "image/png";
 };
 
-router.post('/upload/file', auth.required, (req, res, next) => {
+router.post('/upload/file', (req, res, next) => {
   const form = new multiparty.Form();
   
   form.parse(req, async (error, fields, files) => {
     if (error) throw new Error(error);
     try {
-      const path = files.file[0].path;
-      if(files.file[0].size > 8*1024*1024) {
-        res.statusCode = 400;
-        res.end("file_too_big");
-        return;
-      }
-      let file = new Files({
-        fileType: files.file[0].headers['content-type'],
-        fileName: files.file[0].headers['name']
-      });
-      console.log(req);
-      file.save().then(async (document) => {
-        const buffer = fs.readFileSync(path);
-        const data = await uploadFile(buffer, req.payload.id + "/" + document._id.toString(), files.file[0].headers['name'], files.file[0].headers['content-type']);
-        document.fileURL = data.Location;
-        document.save().then((document) => {
-          res.statusCode = 200;
-          res.end(document._id);
+      console.log("a");
+      jwt.verify(fields.token[0], process.env.JWT_SECRET, function(err, decode) {
+        if(!decode) {
+          return;
+        }
+        console.log("b");
+        const path = files.file[0].path;
+        if(files.file[0].size > 8*1024*1024) {
+          res.statusCode = 400;
+          res.end("file_too_big");
+          return;
+        }
+        console.log(files.file[0].headers);
+        let file = new Files({
+          fileType: files.file[0].headers['content-type'],
+          fileName: files.file[0].headers['name']
+        });
+        file.save().then(async (document) => {
+          const buffer = fs.readFileSync(path);
+          const data = await uploadFile(buffer, decode.id + "/" + document._id.toString(), fields.name[0], files.file[0].headers['content-type']);
+          document.fileURL = data.Location;
+          document.save().then((document) => {
+            console.log("c");
+            res.statusCode = 200;
+            res.end(JSON.stringify({id: document._id}));
+            return;
+          });
         });
       });
-      res.statusCode = 500;
-      res.end("unkerr");
     } catch (error) {
       res.statusCode = 500;
       logger.error(error);
@@ -74,7 +81,7 @@ router.post('/upload/file', auth.required, (req, res, next) => {
   });
 });
 
-router.post('/upload/pfp', auth.required, (req, res, next) => {
+router.post('/upload/pfp', (req, res, next) => {
   const form = new multiparty.Form();
   
   form.parse(req, async (error, fields, files) => {

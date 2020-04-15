@@ -10,7 +10,7 @@ const MessagesSchema = new Schema({
   userId: String,
   planetId: String,
   channelId: String,
-  attachments: { type: [{ type: String, id: String }], default: [] }
+  attachments: { type: [{ type: String, attachmentId: String }], default: [] }
 });
 
 mongoose.model('Messages', MessagesSchema);

@@ -18,7 +18,7 @@ require('./models/Planets');
 require('./models/PlanetMembers');
 require('./models/Messages');
 require('./models/Channels');
-require('./models/Files');
+require('./models/Attachments');
 
 //import server modules
 const socketServer = require('./socket/SocketServer');

@@ -30,7 +30,7 @@ class MessageHandler {
     this.socket.emit("acceptingMessages");
   }
 
-  sendMessage(text, channelId) {
+  sendMessage(text, channelId, attachments) {
     Channels.findById(channelId).then((documentChannel) => {
       if(documentChannel) {
         Planets.findById(documentChannel.planetId).then((document) => {
@@ -42,11 +42,14 @@ class MessageHandler {
                   userId: this.user._id,
                   planetId: document._id,
                   channelId: documentChannel._id,
-                  content: text
+                  content: text,
                 });
                 message.save().then(() => {
+                  console.log("msg sent");
                   logger.debug(this.user._id + " has sent a message: " + text);
                   this.io.to("channel-in-" + documentChannel._id).emit('updatemessage', message._id, message);
+                }).catch(e => {
+                  console.log(e);
                 });
               }
             });

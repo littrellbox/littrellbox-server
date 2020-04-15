@@ -11,6 +11,9 @@ class SocketServer {
   constructor(socket) {
     this.io = socket;
 
+    //global the socket so that we can access it in routes
+    global.io = socket;
+
     this.authenticateUser = this.authenticateUser.bind(this);
     this.disconnectUser = this.disconnectUser.bind(this);
     this.getInfo = this.getInfo.bind(this);

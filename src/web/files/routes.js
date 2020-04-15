@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const router = require('express').Router();
-const Files = mongoose.model('Files');
+const Attachments = mongoose.model('Attachments');
 const fs = require('fs');
 const request = require('request');
 const AWS = require('aws-sdk');
@@ -56,19 +56,23 @@ router.post('/upload/file', (req, res, next) => {
           res.end("file_too_big");
           return;
         }
-        console.log(files.file[0].headers);
-        let file = new Files({
-          fileType: files.file[0].headers['content-type'],
-          fileName: files.file[0].headers['name']
+        let file = new Attachments({
+          type: "file",
+          userId: decode.id,
+          name: fields.name[0],
+          data: {
+            type: files.file[0].headers['content-type'],
+            url: ""
+          }
         });
         file.save().then(async (document) => {
           const buffer = fs.readFileSync(path);
           const data = await uploadFile(buffer, decode.id + "/" + document._id.toString(), fields.name[0], files.file[0].headers['content-type']);
-          document.fileURL = data.Location;
+          document.data.url = data.Location;
           document.save().then((document) => {
             console.log("c");
             res.statusCode = 200;
-            res.end(JSON.stringify({id: document._id}));
+            res.end({success: true});
             return;
           });
         });

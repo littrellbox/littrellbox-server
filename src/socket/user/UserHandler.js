@@ -40,7 +40,7 @@ class UserHandler {
         delete document.salt;
         this.socket.emit("updateuser", document);
       }
-    });
+    }).catch((error) => {logger.error(error);});
   }
 
   getCurrentUser() {
@@ -50,7 +50,7 @@ class UserHandler {
         delete document.salt;
         this.socket.emit("setuser", document);
       }
-    });
+    }).catch((error) => {logger.error(error);});
   }
 
   subscribeToUser(id) {
@@ -64,7 +64,7 @@ class UserHandler {
         }
         this.socket.emit("updateuser", document);
       }
-    });
+    }).catch((error) => {logger.error(error);});
   }
 
   unsubscribeFromUser(id) {

@@ -41,9 +41,9 @@ class ChannelHandler {
         });
         channel.save().then(() => {
           this.io.to('planet-in-' + planetId).emit("updatechannel", channel._id, channel);
-        });
+        }).catch((error) => {logger.error(error);});
       }
-    });
+    }).catch((error) => {logger.error(error);});
   }
   
   getAllChannels(planetId) {
@@ -55,11 +55,11 @@ class ChannelHandler {
               for(const channel of channelDocuments) {
                 this.socket.emit("updatechannel", channel._id, channel);
               }
-            });
+            }).catch((error) => {logger.error(error);});
           }
-        });
+        }).catch((error) => {logger.error(error);});
       }
-    });
+    }).catch((error) => {logger.error(error);});
   }
 
   openChannel(channelId) {
@@ -77,11 +77,11 @@ class ChannelHandler {
                 this.socket.join("channel-in-" + channelId.toString());
                 this.socket.emit("setchannel", documentChannel);
               }
-            });
+            }).catch((error) => {logger.error(error);});
           }
-        });
+        }).catch((error) => {logger.error(error);});
       }
-    });
+    }).catch((error) => {logger.error(error);});
   }
 
   getChannel(channelId) {
@@ -93,11 +93,11 @@ class ChannelHandler {
               if(document2) {
                 this.socket.emit("updatechannel", channelId, document);
               }
-            });
+            }).catch((error) => {logger.error(error);});
           }
-        });
+        }).catch((error) => {logger.error(error);});
       }
-    });
+    }).catch((error) => {logger.error(error);});
   }
 }
 

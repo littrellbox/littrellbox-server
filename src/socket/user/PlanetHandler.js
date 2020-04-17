@@ -53,9 +53,11 @@ class PlanetHandler {
         userId: this.user._id,
         planetId: planet._id
       });
-      member.save();
+      member.save().catch((error) => {logger.error(error);});
       this.socket.emit('updateplanet', planet._id, planet);
-    });
+      this.socket.join("planet-in-" + planet._id.toString());
+      this.socket.emit("setplanet", planet);
+    }).catch((error) => {logger.error(error);});
   }
 
   joinPlanet(planetId, inviteId) {
@@ -66,13 +68,13 @@ class PlanetHandler {
             userId: this.user._id,
             planetId: document._id
           });
-          member.save();
+          member.save().catch((error) => {logger.error(error);});
           this.socket.emit('updateplanet', document._id, document);
           this.socket.join("planet-in-" + planetId.toString());
           this.socket.emit("setplanet", document);
         }
-      });
-    });
+      }).catch((error) => {logger.error(error);});
+    }).catch((error) => {logger.error(error);});
   }
 
   openPlanet(planetId) {
@@ -88,15 +90,15 @@ class PlanetHandler {
             this.socket.join("planet-in-" + planetId.toString());
             this.socket.emit("setplanet", document);
           }
-        });
+        }).catch((error) => {logger.error(error);});
       }
-    });
+    }).catch((error) => {logger.error(error);});
   }
 
   getPlanet(planetId) {
     Planets.findById(planetId, (err, document) => {
       this.socket.emit('updateplanet', planet._id, document);
-    });
+    }).catch((error) => {logger.error(error);});
   }
 
   getAllPlanets() {
@@ -107,29 +109,29 @@ class PlanetHandler {
             this.socket.join(document.planetId.toString());
             this.socket.emit('updateplanet', document2._id, document2);
           }
-        });
+        }).catch((error) => {logger.error(error);});
       }
-    });
+    }).catch((error) => {logger.error(error);});
   }
 
   getInvite(planetId) {
     Planets.findById(planetId).then((document) => {
       if(document && document.invites.length === 0 && document.userId === this.user._id.toString()) {
         document.invites.push(uuidv4());
-        document.save();
+        document.save().catch((error) => {logger.error(error);});
         logger.debug("Sending " + document._id + " invite to " + this.user._id);
         this.socket.emit("recvinvite", document.invites[0]);
       } else if(document && document.userId === this.user._id.toString()) {
         logger.debug("Sending " + document._id + " invite to " + this.user._id);
         this.socket.emit("recvinvite", document.invites[0]);
       }
-    });
+    }).catch((error) => {logger.error(error);});
   }
   
   getInvitePlanet(inviteId) {
     Planets.find({ invites: inviteId }).then((document) => {
       this.socket.emit("setinviteplanet", document);
-    });
+    }).catch((error) => {logger.error(error);});
   }
 }
 

@@ -3,6 +3,7 @@ const PlanetMembers = mongoose.model('PlanetMembers');
 const Planets = mongoose.model('Planets');
 const Channels = mongoose.model('Channels');
 const Messages = mongoose.model('Messages');
+const Attachments = mongoose.model('Attachments');
 
 //setup logging
 const log4js = require('log4js');
@@ -17,6 +18,7 @@ class MessageHandler {
     this.sendMessage = this.sendMessage.bind(this);
     this.getMessage = this.getMessage.bind(this);
     this.getMessages = this.getMessages.bind(this);
+    this.getAttachments = this.getAttachments.bind(this);
   }
 
   user = null;
@@ -27,10 +29,11 @@ class MessageHandler {
     this.socket.on("sendmessage", this.sendMessage);
     this.socket.on("getmessage", this.getMessage);
     this.socket.on("getmessages", this.getMessages);
+    this.socket.on("getattachments", this.getAttachments);
     this.socket.emit("acceptingMessages");
   }
 
-  sendMessage(text, channelId, attachments) {
+  sendMessage(text, channelId, predictionId) {
     Channels.findById(channelId).then((documentChannel) => {
       if(documentChannel) {
         Planets.findById(documentChannel.planetId).then((document) => {
@@ -45,18 +48,19 @@ class MessageHandler {
                   content: text,
                 });
                 message.save().then(() => {
-                  console.log("msg sent");
                   logger.debug(this.user._id + " has sent a message: " + text);
+                  if(predictionId) {
+                    //tell the client we're done
+                    this.socket.emit("msgpredictionsuccess", predictionId, message._id);
+                  }
                   this.io.to("channel-in-" + documentChannel._id).emit('updatemessage', message._id, message);
-                }).catch(e => {
-                  console.log(e);
-                });
+                }).catch((error) => {logger.error(error);});
               }
-            });
+            }).catch((error) => {logger.error(error);});
           }
-        });
+        }).catch((error) => {logger.error(error);});
       }
-    });
+    }).catch((error) => {logger.error(error);});
   }
 
   getMessage(messageId) {
@@ -66,9 +70,9 @@ class MessageHandler {
           if(document2) {
             this.socket.emit("recvmessage", messageId, message);
           }
-        });
+        }).catch((error) => {logger.error(error);});
       }
-    });
+    }).catch((error) => {logger.error(error);});
   }
 
   getMessages(channelId) {
@@ -80,15 +84,22 @@ class MessageHandler {
               if(document2) {
                 Messages.find({channelId: channelId}).limit(50).sort({"date":-1}).then((messages) => {
                   this.socket.emit("recvbatchmessage", messages.reverse());
-                });
+                }).catch((error) => {logger.error(error);});
               }
-            });
+            }).catch((error) => {logger.error(error);});
           }
-        });
+        }).catch((error) => {logger.error(error);});
       }
-    });
+    }).catch((error) => {logger.error(error);});
   }
 
+  getAttachments(messageId) {
+    Attachments.find({messageId: messageId}).then((documents) => {
+      for(let i = 0; i < documents.length; i++) {
+        this.socket.emit("updateattachment", documents[i]);
+      }
+    }).catch((error) => {logger.error(error);});
+  }
 }
 
 module.exports = MessageHandler;

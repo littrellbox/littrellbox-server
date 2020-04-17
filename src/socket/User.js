@@ -39,7 +39,7 @@ class User {
         Users.findByIdAndUpdate(document._id, {'$push': {sessionServers: process.env.UUID.toString()}}, {new: true}).then((documentNew) => {
           this.io.to("usersub-" + documentNew._id.toString()).emit("updateuser", documentNew.sanitize());
           this.socket.emit("setuser", documentNew);
-        });
+        }).catch((error) => {logger.error(error);});
       }
     });
   }
@@ -56,8 +56,8 @@ class User {
         this.io.to("usersub-" + documentNew._id.toString()).emit("updateuser", documentNew.sanitize());
         this.socket.emit("setuser", documentNew);
         afterCallback();
-      });
-    });
+      }).catch((error) => {logger.error(error);});
+    }).catch((error) => {logger.error(error);});
   }
 
   deleteChildren() {

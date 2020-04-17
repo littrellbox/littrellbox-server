@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const router = require('express').Router();
 const Attachments = mongoose.model('Attachments');
+const Messages = mongoose.model('Messages');
 const fs = require('fs');
 const request = require('request');
 const AWS = require('aws-sdk');
@@ -63,18 +64,24 @@ router.post('/upload/file', (req, res, next) => {
           data: {
             type: files.file[0].headers['content-type'],
             url: ""
-          }
+          },
+          messageId: fields.message[0]
         });
-        file.save().then(async (document) => {
-          const buffer = fs.readFileSync(path);
-          const data = await uploadFile(buffer, decode.id + "/" + document._id.toString(), fields.name[0], files.file[0].headers['content-type']);
-          document.data.url = data.Location;
-          document.save().then((document) => {
-            console.log("c");
-            res.statusCode = 200;
-            res.end({success: true});
-            return;
-          });
+        Messages.findById(file.messageId).then((messageDocument) => {
+          if(messageDocument.userId === decode.id) {
+            file.save().then(async (document) => {
+              const buffer = fs.readFileSync(path);
+              const data = await uploadFile(buffer, decode.id + "/" + document._id.toString(), fields.name[0], files.file[0].headers['content-type']);
+              document.data.url = data.Location;
+              document.save().then((document) => {
+                console.log("c");
+                res.statusCode = 200;
+                res.end({success: true});
+                global.io.to("channel-in-" + document.channelId).emit("updateattachment", file.messageId, file);
+                return;
+              });
+            });
+          }
         });
       });
     } catch (error) {

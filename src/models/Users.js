@@ -25,6 +25,7 @@ UsersSchema.methods.validatePassword = function(password) {
 
 UsersSchema.methods.sanitize = function() {
   return {
+    _id: this._id,
     username: this.username,
     permission: this.permission,
     sessionServers: this.sessionServers

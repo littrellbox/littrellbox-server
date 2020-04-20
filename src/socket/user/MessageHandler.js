@@ -40,7 +40,7 @@ class MessageHandler {
             let message = new Messages({
               username: this.user.username, //cache the username to prevent mass lookups
               userId: this.user._id,
-              planetId: document._id,
+              planetId: documentChannel.planetId,
               channelId: documentChannel._id,
               content: text,
             });

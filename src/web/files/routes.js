@@ -3,7 +3,6 @@ const router = require('express').Router();
 const Attachments = mongoose.model('Attachments');
 const Messages = mongoose.model('Messages');
 const fs = require('fs');
-const request = require('request');
 const AWS = require('aws-sdk');
 const bluebird = require('bluebird');
 const multiparty = require('multiparty');
@@ -39,18 +38,17 @@ const checkIsBrowserRenderable = function(filetype) {
   return filetype === "image/jpeg" || filetype === "image/gif" || filetype === "image/png";
 };
 
-router.post('/upload/file', (req, res, next) => {
+router.post('/upload/file', (req, res) => {
   const form = new multiparty.Form();
   
   form.parse(req, async (error, fields, files) => {
+    logger.debug("got request to upload file");
     if (error) throw new Error(error);
     try {
-      console.log("a");
       jwt.verify(fields.token[0], process.env.JWT_SECRET, function(err, decode) {
         if(!decode) {
           return;
         }
-        console.log("b");
         const path = files.file[0].path;
         if(files.file[0].size > 8*1024*1024) {
           res.statusCode = 400;
@@ -74,11 +72,9 @@ router.post('/upload/file', (req, res, next) => {
               const data = await uploadFile(buffer, decode.id + "/" + document._id.toString(), fields.name[0], files.file[0].headers['content-type']);
               document.data.url = data.Location;
               document.save().then((document) => {
-                console.log("c");
                 res.statusCode = 200;
-                res.end({success: true});
+                res.json({success: true});
                 global.io.to("channel-in-" + document.channelId).emit("updateattachment", file.messageId, file);
-                return;
               });
             });
           }
@@ -92,7 +88,7 @@ router.post('/upload/file', (req, res, next) => {
   });
 });
 
-router.post('/upload/pfp', (req, res, next) => {
+router.post('/upload/pfp', (req, res) => {
   const form = new multiparty.Form();
   
   form.parse(req, async (error, fields, files) => {
@@ -121,6 +117,7 @@ router.post('/upload/pfp', (req, res, next) => {
   });
 });
 
+/*
 router.get('/get/download/:file', (req, res, next) => {
 
 });
@@ -128,5 +125,6 @@ router.get('/get/download/:file', (req, res, next) => {
 router.get('/get/grab/:file', (req, res, next) => {
   
 });
+ */
 
 module.exports = router;

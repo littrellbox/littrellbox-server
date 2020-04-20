@@ -73,9 +73,9 @@ class ChannelHandler {
                   this.socket.leave("channel-in-" + this.currentChannel);
                 }
                 this.currentChannel = channelId;
-                logger.debug(this.user.username + " joined " + channelId);
                 this.socket.join("channel-in-" + channelId.toString());
                 this.socket.emit("setchannel", documentChannel);
+                logger.debug(this.user.username + " joined " + channelId);
               }
             }).catch((error) => {logger.error(error);});
           }

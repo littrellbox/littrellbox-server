@@ -7,7 +7,7 @@ const Attachments = mongoose.model('Attachments');
 
 //setup logging
 const log4js = require('log4js');
-const logger = log4js.getLogger('planet');
+const logger = log4js.getLogger('messages');
 logger.level = 'debug';
 
 class MessageHandler {

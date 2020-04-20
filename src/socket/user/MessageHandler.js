@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 const PlanetMembers = mongoose.model('PlanetMembers');
-const Planets = mongoose.model('Planets');
 const Channels = mongoose.model('Channels');
 const Messages = mongoose.model('Messages');
 const Attachments = mongoose.model('Attachments');
@@ -36,26 +35,22 @@ class MessageHandler {
   sendMessage(text, channelId, predictionId) {
     Channels.findById(channelId).then((documentChannel) => {
       if(documentChannel) {
-        Planets.findById(documentChannel.planetId).then((document) => {
-          if(document) {
-            PlanetMembers.findOne({'$and': [{userId: this.user._id}, {planetId: documentChannel.planetId}]}).then((document2) => {
-              if(document2) {
-                let message = new Messages({
-                  username: this.user.username, //cache the username to prevent mass lookups
-                  userId: this.user._id,
-                  planetId: document._id,
-                  channelId: documentChannel._id,
-                  content: text,
-                });
-                message.save().then(() => {
-                  logger.debug(this.user._id + " has sent a message: " + text);
-                  if(predictionId) {
-                    //tell the client we're done
-                    this.socket.emit("msgpredictionsuccess", predictionId, message._id);
-                  }
-                  this.io.to("channel-in-" + documentChannel._id).emit('updatemessage', message._id, message);
-                }).catch((error) => {logger.error(error);});
+        PlanetMembers.findOne({'$and': [{userId: this.user._id}, {planetId: documentChannel.planetId}]}).then((document2) => {
+          if(document2) {
+            let message = new Messages({
+              username: this.user.username, //cache the username to prevent mass lookups
+              userId: this.user._id,
+              planetId: document._id,
+              channelId: documentChannel._id,
+              content: text,
+            });
+            message.save().then(() => {
+              logger.debug(this.user._id + " has sent a message: " + text);
+              if(predictionId) {
+                //tell the client we're done
+                this.socket.emit("msgpredictionsuccess", predictionId, message._id);
               }
+              this.io.to("channel-in-" + documentChannel._id).emit('updatemessage', message._id, message);
             }).catch((error) => {logger.error(error);});
           }
         }).catch((error) => {logger.error(error);});
@@ -78,14 +73,10 @@ class MessageHandler {
   getMessages(channelId) {
     Channels.findById(channelId).then((documentChannel) => {
       if(documentChannel) {
-        Planets.findById(documentChannel.planetId).then((document) => {
-          if(document) {
-            PlanetMembers.findOne({'$and': [{userId: this.user._id}, {planetId: documentChannel.planetId}]}).then((document2) => {
-              if(document2) {
-                Messages.find({channelId: channelId}).limit(50).sort({"date":-1}).then((messages) => {
-                  this.socket.emit("recvbatchmessage", messages.reverse());
-                }).catch((error) => {logger.error(error);});
-              }
+        PlanetMembers.findOne({'$and': [{userId: this.user._id}, {planetId: documentChannel.planetId}]}).then((document2) => {
+          if(document2) {
+            Messages.find({channelId: channelId}).limit(50).sort({"date":-1}).then((messages) => {
+              this.socket.emit("recvbatchmessage", messages.reverse());
             }).catch((error) => {logger.error(error);});
           }
         }).catch((error) => {logger.error(error);});
@@ -94,9 +85,17 @@ class MessageHandler {
   }
 
   getAttachments(messageId) {
-    Attachments.find({messageId: messageId}).then((documents) => {
-      for(let i = 0; i < documents.length; i++) {
-        this.socket.emit("updateattachment", documents[i]);
+    Messages.findById(messageId).then((messageDocument) => {
+      if(messageDocument) {
+        PlanetMembers.findOne({'$and': [{userId: this.user._id}, {planetId: messageDocument.planetId}]}).then((document2) => {
+          if(document2) {
+            Attachments.find({messageId: messageId}).then((documents) => {
+              for(let i = 0; i < documents.length; i++) {
+                this.socket.emit("updateattachment", documents[i]);
+              }
+            }).catch((error) => {logger.error(error);});
+          }
+        }).catch((error) => {logger.error(error);});
       }
     }).catch((error) => {logger.error(error);});
   }

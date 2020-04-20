@@ -61,19 +61,21 @@ class PlanetHandler {
   }
 
   joinPlanet(planetId, inviteId) {
-    Planets.findById(planetId, (err, document) => {
-      PlanetMembers.findOne({'$and': [{userId: this.user._id}, {planetId: planetId}]}).then((member) => {
-        if(document.invites.includes(inviteId) && !member) {
-          let member = new PlanetMembers({
-            userId: this.user._id,
-            planetId: document._id
-          });
-          member.save().catch((error) => {logger.error(error);});
-          this.socket.emit('updateplanet', document._id, document);
-          this.socket.join("planet-in-" + planetId.toString());
-          this.socket.emit("setplanet", document);
-        }
-      }).catch((error) => {logger.error(error);});
+    Planets.findById(planetId, (document) => {
+      if(document) {
+        PlanetMembers.findOne({'$and': [{userId: this.user._id}, {planetId: planetId}]}).then((member) => {
+          if(document.invites.includes(inviteId) && !member) {
+            let member = new PlanetMembers({
+              userId: this.user._id,
+              planetId: document._id
+            });
+            member.save().catch((error) => {logger.error(error);});
+            this.socket.emit('updateplanet', document._id, document);
+            this.socket.join("planet-in-" + planetId.toString());
+            this.socket.emit("setplanet", document);
+          }
+        }).catch((error) => {logger.error(error);});
+      }
     }).catch((error) => {logger.error(error);});
   }
 

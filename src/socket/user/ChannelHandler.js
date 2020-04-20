@@ -47,15 +47,11 @@ class ChannelHandler {
   }
   
   getAllChannels(planetId) {
-    Planets.findById(planetId).then((document) => {
-      if(document) {
-        PlanetMembers.findOne({'$and': [{userId: this.user._id}, {planetId: planetId}]}).then((document2) => {
-          if(document2) {
-            Channels.find({planetId: planetId}).then((channelDocuments) => {
-              for(const channel of channelDocuments) {
-                this.socket.emit("updatechannel", channel._id, channel);
-              }
-            }).catch((error) => {logger.error(error);});
+    PlanetMembers.findOne({'$and': [{userId: this.user._id}, {planetId: planetId}]}).then((document2) => {
+      if(document2) {
+        Channels.find({planetId: planetId}).then((channelDocuments) => {
+          for(const channel of channelDocuments) {
+            this.socket.emit("updatechannel", channel._id, channel);
           }
         }).catch((error) => {logger.error(error);});
       }
@@ -65,19 +61,15 @@ class ChannelHandler {
   openChannel(channelId) {
     Channels.findById(channelId).then((documentChannel) => {
       if(documentChannel) {
-        Planets.findById(documentChannel.planetId).then((document) => {
-          if(document) {
-            PlanetMembers.findOne({'$and': [{userId: this.user._id}, {planetId: documentChannel.planetId}]}).then((document2) => {
-              if(document2) {
-                if(this.currentChannel !== null) {
-                  this.socket.leave("channel-in-" + this.currentChannel);
-                }
-                this.currentChannel = channelId;
-                this.socket.join("channel-in-" + channelId.toString());
-                this.socket.emit("setchannel", documentChannel);
-                logger.debug(this.user.username + " joined " + channelId);
-              }
-            }).catch((error) => {logger.error(error);});
+        PlanetMembers.findOne({'$and': [{userId: this.user._id}, {planetId: documentChannel.planetId}]}).then((document2) => {
+          if(document2) {
+            if(this.currentChannel !== null) {
+              this.socket.leave("channel-in-" + this.currentChannel);
+            }
+            this.currentChannel = channelId;
+            this.socket.join("channel-in-" + channelId.toString());
+            this.socket.emit("setchannel", documentChannel);
+            logger.debug(this.user.username + " joined " + channelId);
           }
         }).catch((error) => {logger.error(error);});
       }
@@ -87,13 +79,9 @@ class ChannelHandler {
   getChannel(channelId) {
     Channels.findById(channelId).then((documentChannel) => {
       if(documentChannel) {
-        Planets.findById(planetId).then((document) => {
-          if(document) {
-            PlanetMembers.findOne({'$and': [{userId: this.user._id}, {planetId: planetId}]}).then((document2) => {
-              if(document2) {
-                this.socket.emit("updatechannel", channelId, document);
-              }
-            }).catch((error) => {logger.error(error);});
+        PlanetMembers.findOne({'$and': [{userId: this.user._id}, {planetId: planetId}]}).then((document2) => {
+          if(document2) {
+            this.socket.emit("updatechannel", channelId, document);
           }
         }).catch((error) => {logger.error(error);});
       }

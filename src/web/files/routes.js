@@ -75,7 +75,7 @@ router.post('/upload/file', (req, res) => {
                 res.statusCode = 200;
                 res.json({success: true});
                 logger.debug("file " + document._id + " uploaded successfully");
-                global.io.to("channel-in-" + document.channelId).emit("updateattachment", file.messageId, file);
+                global.io.to("channel-in-" + document.channelId).emit("updateattachment", file);
               });
             });
           }

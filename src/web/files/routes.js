@@ -118,14 +118,4 @@ router.post('/upload/pfp', (req, res) => {
   });
 });
 
-/*
-router.get('/get/download/:file', (req, res, next) => {
-
-});
-
-router.get('/get/grab/:file', (req, res, next) => {
-  
-});
- */
-
 module.exports = router;

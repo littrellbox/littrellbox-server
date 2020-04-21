@@ -7,7 +7,7 @@ const logger = log4js.getLogger('startup');
 logger.level = 'debug'; //TODO: get from env
 
 //setup global variables
-global.version = "0.1-alpha-rc2";
+global.version = "0.1-alpha-rc3";
 
 logger.info("Littrellbox server version: " + global.version);
 

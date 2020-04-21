@@ -7,6 +7,7 @@ const AWS = require('aws-sdk');
 const bluebird = require('bluebird');
 const multiparty = require('multiparty');
 const jwt = require('jsonwebtoken');
+const request = require('request');
 
 const log4js = require('log4js');
 const logger = log4js.getLogger('files');
@@ -69,13 +70,13 @@ router.post('/upload/file', (req, res) => {
           if(messageDocument.userId === decode.id) {
             file.save().then(async (document) => {
               const buffer = fs.readFileSync(path);
-              const data = await uploadFile(buffer, decode.id + "/" + document._id.toString(), fields.name[0], files.file[0].headers['content-type']);
-              document.data.url = data.Location;
-              document.save().then((document) => {
-                res.statusCode = 200;
-                res.json({success: true});
-                logger.debug("file " + document._id + " uploaded successfully");
-                global.io.to("channel-in-" + document.channelId).emit("updateattachment", file);
+              uploadFile(buffer, decode.id + "/" + document._id.toString(), fields.name[0], files.file[0].headers['content-type']).then((data) => {
+                Attachments.findByIdAndUpdate(document._id, {$set: {"data.url": data.Location.toString()}}).then((document) => {
+                  res.statusCode = 200;
+                  res.json({success: true});
+                  logger.debug("file " + document._id + " uploaded successfully: " + document.data.url);
+                  global.io.to("channel-in-" + messageDocument.channelId).emit("updateattachment", file);
+                });
               });
             });
           }
@@ -116,6 +117,11 @@ router.post('/upload/pfp', (req, res) => {
       res.end(error.toString());
     }
   });
+});
+
+router.get('/get/:uid/:aid/:name', (req, res) => {
+  console.log(process.env.S3_ENDPOINT + "/" + process.env.S3_BUCKET + "/" + req.params.uid + "/" + req.params.aid + "/" + req.params.name);
+  request(process.env.S3_ENDPOINT + "/" + process.env.S3_BUCKET + "/" + req.params.uid + "/" + req.params.aid + "/" + req.params.name).pipe(res);
 });
 
 module.exports = router;

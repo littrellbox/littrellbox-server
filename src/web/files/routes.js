@@ -120,7 +120,6 @@ router.post('/upload/pfp', (req, res) => {
 });
 
 router.get('/get/:uid/:aid/:name', (req, res) => {
-  console.log(process.env.S3_ENDPOINT + "/" + process.env.S3_BUCKET + "/" + req.params.uid + "/" + req.params.aid + "/" + req.params.name);
   request(process.env.S3_ENDPOINT + "/" + process.env.S3_BUCKET + "/" + req.params.uid + "/" + req.params.aid + "/" + req.params.name).pipe(res);
 });
 
